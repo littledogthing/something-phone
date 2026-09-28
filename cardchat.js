@@ -481,8 +481,26 @@
 .cc-btn:disabled { opacity:.45; cursor:default; }
 .cc-btns { display:flex; gap:9px; flex-wrap:wrap; margin-top:14px; }
 
-.cc-msgs { padding:14px 14px 20px; }
-.cc-msg { display:flex; margin-bottom:11px; }
+.cc-msgs { padding:14px 12px 20px; }
+.cc-msg { display:flex; margin-bottom:14px; align-items:flex-start; gap:9px; }
+.cc-m-av { flex:0 0 auto; width:38px; display:flex; flex-direction:column;
+  align-items:center; gap:4px; }
+.cc-m-av .cc-av { width:38px; height:38px; font-size:17px; }
+.cc-m-av .cc-m-time { font-size:9.5px; color:var(--text-secondary,#8a8a8a);
+  line-height:1.2; letter-spacing:-.02em; }
+.cc-m-wrap { display:flex; flex-direction:column; align-items:flex-end;
+  max-width:74%; gap:4px; }
+.cc-m-wrap .cc-m-time { font-size:9.5px; color:var(--text-secondary,#8a8a8a); }
+
+/* ---- 大頭貼選擇 ---- */
+#${SCREEN_ID} .header > span:nth-child(2) { display:flex; align-items:center; gap:8px; }
+.cc-av.hd { width:28px; height:28px; font-size:13px; }
+
+.cc-avpick { display:flex; align-items:center; gap:10px; margin-top:6px; }
+.cc-avprev { width:54px; height:54px; border-radius:50%; flex:0 0 auto;
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+  background:var(--accent-color,#007bff); color:#fff; font-size:22px; }
+.cc-avprev img { width:100%; height:100%; object-fit:cover; }
 .cc-msg.me { justify-content:flex-end; }
 .cc-bub { max-width:74%; padding:9px 13px; border-radius:17px; font-size:15px;
   line-height:1.55; word-break:break-word; white-space:pre-wrap;
@@ -529,6 +547,15 @@
   padding:10px 17px; border-radius:999px; font-size:13.5px; z-index:99999;
   transition:.22s; pointer-events:none; max-width:82vw; text-align:center; }
 .cc-toast.show { opacity:1; transform:translate(-50%,0); }
+
+/* ---- 宿主版面修正：主畫面分頁圓點置中 ----
+   style.css 原本寫的是 left:50% + translateX(-50%)，但 transform 被別的規則蓋掉，
+   圓點就黏在右下角。這裡改用「左右都撐到 0 + flex 置中」，不依賴 transform，
+   所以不管誰蓋 transform 都會置中。#id + class 的權重高於單獨的 class。 */
+#home-screen .pagination-dots{
+  left:0 !important; right:0 !important; width:100% !important;
+  transform:none !important; justify-content:center !important;
+}
 
 /* ---- 第三頁排成三欄 ----
    宿主 ephone-modern.css 用 display:flex !important 排成單排，
@@ -607,6 +634,77 @@
 .cc-sec { font-size:12px; color:var(--text-secondary,#8a8a8a);
   padding:18px 14px 7px; }
 `;
+
+  /* ========================================================================
+   * 大頭貼
+   * ------------------------------------------------------------------------
+   * 上傳的圖一律壓成 200x200 的 JPEG 再存。原圖動輒好幾 MB，直接塞進
+   * IndexedDB 會讓資料庫和備份檔爆掉——Mochi 就為這件事打過好幾個補丁。
+   * ======================================================================*/
+  function shrinkImage(file, size) {
+    size = size || 200;
+    return new Promise(function (resolve, reject) {
+      var fr = new FileReader();
+      fr.onerror = function () { reject(new Error('讀不到這個檔案')); };
+      fr.onload = function () {
+        var img = new Image();
+        img.onerror = function () { reject(new Error('這不是能顯示的圖片')); };
+        img.onload = function () {
+          var side = Math.min(img.width, img.height);       // 置中裁成正方形
+          var sx = (img.width - side) / 2, sy = (img.height - side) / 2;
+          var cv = document.createElement('canvas');
+          cv.width = cv.height = size;
+          cv.getContext('2d').drawImage(img, sx, sy, side, side, 0, 0, size, size);
+          resolve(cv.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+
+  function avatarHTML(ch, cls) {
+    return '<div class="cc-av' + (cls ? ' ' + cls : '') + '">' +
+      (ch && ch.avatar ? '<img src="' + esc(ch.avatar) + '">'
+                       : esc(((ch && ch.name) || '?').slice(0, 1))) + '</div>';
+  }
+
+  // 大頭貼選擇欄：真實 file input 由 CSS 鋪在按鈕上（.cc-pick），不用程式化 click
+  function avatarField(cur, name) {
+    return '<div class="cc-avpick">' +
+      '<span class="cc-avprev" id="cc-f-avprev">' +
+        (cur ? '<img src="' + esc(cur) + '">' : esc((name || '?').slice(0, 1))) + '</span>' +
+      '<span class="cc-pick"><button type="button" class="cc-btn ghost">選擇圖片</button>' +
+      '<input type="file" id="cc-f-avfile" accept="image/*"></span>' +
+      '<button type="button" class="cc-btn ghost" id="cc-f-avclear">清除</button>' +
+      '<input type="hidden" id="cc-f-av" value="' + esc(cur || '') + '">' +
+      '</div>';
+  }
+
+  function bindAvatarField(m) {
+    var file = m.querySelector('#cc-f-avfile');
+    var hid = m.querySelector('#cc-f-av');
+    var prev = m.querySelector('#cc-f-avprev');
+    if (!file) return;
+    file.onchange = async function () {
+      var f = file.files && file.files[0];
+      file.value = '';
+      if (!f) return;
+      try {
+        var data = await shrinkImage(f, 200);
+        hid.value = data;
+        prev.innerHTML = '<img src="' + esc(data) + '">';
+      } catch (e) {
+        ccAlert('讀不到這張圖', String((e && e.message) || e) +
+          '。如果是從 iCloud 選的，先讓它下載完再試。');
+      }
+    };
+    m.querySelector('#cc-f-avclear').onclick = function () {
+      hid.value = '';
+      var nm = m.querySelector('#cc-f-name');
+      prev.textContent = ((nm && nm.value) || '?').slice(0, 1) || '?';
+    };
+  }
 
   /* ========================================================================
    * 彈窗
@@ -791,9 +889,7 @@
           var last = await db.msgs.where('charId').equals(c.id).reverse().sortBy('ts');
           var sub = last.length ? (last[0].who === 'me' ? '我：' : '') + last[0].text : '還沒有對話';
           html += '<div class="cc-row" data-char="' + c.id + '">' +
-            '<div class="cc-av">' + (c.avatar
-              ? '<img src="' + esc(c.avatar) + '">'
-              : esc((c.name || '?').slice(0, 1))) + '</div>' +
+            avatarHTML(c) +
             '<div class="cc-row-main">' +
               '<div class="cc-row-name">' + esc(c.name) + '</div>' +
               '<div class="cc-row-sub">' + esc(sub) + '</div>' +
@@ -827,7 +923,7 @@
     if (view === 'chat') {
       var ch = await db.chars.get(activeCharId);
       if (!ch) return go('list');
-      title.textContent = ch.name;
+      title.innerHTML = avatarHTML(ch, 'hd') + '<span>' + esc(ch.name) + '</span>';
       act.textContent = '⋯';
       act.onclick = function () { charMenu(ch); };
       var msgs = await db.msgs.where('charId').equals(activeCharId).sortBy('ts');
@@ -839,8 +935,14 @@
       msgs.forEach(function (m) {
         var day = new Date(m.ts).toLocaleDateString();
         if (day !== lastDay) { h += '<div class="cc-time">' + day + '</div>'; lastDay = day; }
-        h += '<div class="cc-msg ' + (m.who === 'me' ? 'me' : 'ta') + '">' +
-          '<div class="cc-bub' + (m.cut ? ' cut' : '') + '">' + esc(m.text) + '</div></div>';
+        var bub = '<div class="cc-bub' + (m.cut ? ' cut' : '') + '">' + esc(m.text) + '</div>';
+        if (m.who === 'me') {
+          h += '<div class="cc-msg me"><div class="cc-m-wrap">' + bub +
+            '<span class="cc-m-time">' + hhmm(m.ts) + '</span></div></div>';
+        } else {
+          h += '<div class="cc-msg ta"><div class="cc-m-av">' + avatarHTML(ch) +
+            '<span class="cc-m-time">' + hhmm(m.ts) + '</span></div>' + bub + '</div>';
+        }
       });
       h += '</div><div class="cc-typing" id="cc-typing" style="display:none">對方正在輸入…</div>';
       body.innerHTML = h;
@@ -1060,20 +1162,27 @@
    * 動作
    * ======================================================================*/
   async function addChar() {
-    ccModal({
+    var m = ccModal({
       title: '新增角色',
       sub: '這個角色只存在字卡聊天裡，跟手機其他地方的角色互不相干。',
-      html: '<div class="cc-m-label">名稱</div><input type="text" id="cc-f-name" maxlength="20" placeholder="例如：小雨">',
+      html: '<div class="cc-m-label">名稱</div>' +
+        '<input type="text" id="cc-f-name" maxlength="20" placeholder="例如：小雨">' +
+        '<div class="cc-m-label">大頭貼</div>' + avatarField('', ''),
       buttons: [
         { label: '取消', cls: 'ghost' },
-        { label: '建立', cls: '', onClick: async function (m) {
-            var v = m.querySelector('#cc-f-name').value.trim();
+        { label: '建立', cls: '', onClick: async function (mm) {
+            var v = mm.querySelector('#cc-f-name').value.trim();
             if (!v) return false;
-            await db.chars.add({ id: uid('c'), name: v, avatar: '', createdAt: Date.now() });
+            await db.chars.add({
+              id: uid('c'), name: v,
+              avatar: mm.querySelector('#cc-f-av').value || '',
+              createdAt: Date.now()
+            });
             render();
           } }
       ]
     });
+    bindAvatarField(m);
   }
 
   function charMenu(ch) {
@@ -1081,6 +1190,7 @@
       title: ch.name,
       html:
         '<button class="cc-opt" data-a="rename">改名<small>換一個稱呼</small></button>' +
+        '<button class="cc-opt" data-a="avatar">更換大頭貼<small>會自動壓成 200×200</small></button>' +
         '<button class="cc-opt" data-a="clear">清空對話<small>字卡庫不受影響</small></button>' +
         '<button class="cc-opt danger" data-a="del">刪除角色<small>連同所有對話一起移除</small></button>',
       buttons: [{ label: '取消', cls: 'ghost' }]
@@ -1089,6 +1199,7 @@
         var a = el.dataset.a;
         closeModal();
         if (a === 'rename') renameChar(ch);
+        else if (a === 'avatar') changeAvatar(ch);
         else if (a === 'clear') clearChat(ch);
         else if (a === 'del') removeChar(ch);
       };
@@ -1109,6 +1220,22 @@
           } }
       ]
     });
+  }
+
+  function changeAvatar(ch) {
+    var m = ccModal({
+      title: '更換大頭貼',
+      html: '<input type="hidden" id="cc-f-name" value="' + esc(ch.name) + '">' +
+            avatarField(ch.avatar || '', ch.name),
+      buttons: [
+        { label: '取消', cls: 'ghost' },
+        { label: '儲存', cls: '', onClick: async function (mm) {
+            await db.chars.update(ch.id, { avatar: mm.querySelector('#cc-f-av').value || '' });
+            render(); toast('已更新');
+          } }
+      ]
+    });
+    bindAvatarField(m);
   }
 
   async function clearChat(ch) {

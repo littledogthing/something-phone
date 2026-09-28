@@ -3073,6 +3073,15 @@
         }
 
         function showScreen(screenId) {
+          // FIX：目標畫面不存在時直接返回，不要先把所有畫面關掉。
+          // 原本的順序是「先全部 remove('active')，再去找目標」，目標不存在就變成
+          // 一個畫面都沒開＝整片白屏，而且沒有任何 header，連返回鍵都沒有，
+          // 只能把分頁整個關掉重開。index.html 裡的「X社交」圖示就是這樣卡死的
+          // （它指向 x-social-screen，但這個節點在專案裡根本不存在）。
+          if (!document.getElementById(screenId)) {
+            console.warn("[showScreen] 找不到畫面：" + screenId + "，維持在目前畫面");
+            return;
+          }
           if (
             !document
               .getElementById("logistics-screen")
@@ -5285,15 +5294,6 @@
             minimaxProvider: "cn",
             minimaxSpeechModel: "speech-01-turbo",
             pollinationsApiKey: "", // <--- 新增这一行
-            imageGenerationProvider: "pollinations",
-            openaiImageBaseUrl: "https://api.openai.com/v1",
-            openaiImageApiKey: "",
-            openaiImageModel: "gpt-image-2",
-            openaiImageSize: "1024x1024",
-            openaiImageQuality: "auto",
-            openaiImageBackground: "auto",
-            openaiImageFixedPrompt: "",
-            openaiImageNegativePrompt: "",
           };
 
           // 兼容旧数据，如果加载的设置里没有温度，也给一个默认值
@@ -6483,26 +6483,6 @@
             novelaiEnabled ? "block" : "none";
           document.getElementById("pollinations-api-key").value =
             state.apiConfig.pollinationsApiKey || "";
-          const imageProvider = document.getElementById("image-generation-provider");
-          if (imageProvider) imageProvider.value = state.apiConfig.imageGenerationProvider || "pollinations";
-          const openaiBase = document.getElementById("openai-image-base-url");
-          if (openaiBase) openaiBase.value = state.apiConfig.openaiImageBaseUrl || "https://api.openai.com/v1";
-          const openaiKey = document.getElementById("openai-image-api-key");
-          if (openaiKey) openaiKey.value = state.apiConfig.openaiImageApiKey || "";
-          const openaiModel = document.getElementById("openai-image-model");
-          if (openaiModel) openaiModel.value = state.apiConfig.openaiImageModel || "gpt-image-2";
-          const openaiFixedPrompt = document.getElementById("openai-image-fixed-prompt");
-          if (openaiFixedPrompt) openaiFixedPrompt.value = state.apiConfig.openaiImageFixedPrompt || "";
-          const openaiNegativePrompt = document.getElementById("openai-image-negative-prompt");
-          if (openaiNegativePrompt) openaiNegativePrompt.value = state.apiConfig.openaiImageNegativePrompt || "";
-          const openaiSize = document.getElementById("openai-image-size");
-          if (openaiSize) openaiSize.value = state.apiConfig.openaiImageSize || "1024x1024";
-          const openaiQuality = document.getElementById("openai-image-quality");
-          if (openaiQuality) openaiQuality.value = state.apiConfig.openaiImageQuality || "auto";
-          const openaiBackground = document.getElementById("openai-image-background");
-          if (openaiBackground) openaiBackground.value = state.apiConfig.openaiImageBackground || "auto";
-          const openaiDetails = document.getElementById("openai-image-details");
-          if (openaiDetails) openaiDetails.style.display = (state.apiConfig.imageGenerationProvider || "pollinations") === "openai" ? "block" : "none";
 
           // 2. 更新后台活动相关的开关和输入框
           document.getElementById("background-activity-switch").checked =
@@ -6923,9 +6903,6 @@
               lastMsgDisplay = "[转账]";
             } else if (
               lastMsgObj.type === "ai_image" ||
-              lastMsgObj.type === "naiimag" ||
-              lastMsgObj.type === "image_generation" ||
-              lastMsgObj.type === "gpt_image" ||
               lastMsgObj.type === "user_photo"
             ) {
               lastMsgDisplay = "[照片]";
@@ -7235,8 +7212,21 @@
             chat.settings.background ||
             state.globalSettings.globalChatBackground;
 
-          if (backgroundToApply) {
+          // FIX：背景可能是圖片（data:image / http 網址），也可能是 CSS 漸層字串
+          // （預設值就是 linear-gradient(...)）。原本一律包進 url()，漸層會被當成
+          // 檔名去抓 → 每次開聊天都噴一個 ERR_FILE_NOT_FOUND，而且漸層背景不會顯示。
+          // 同檔另外五處（7682 / 7697 / 7713 / 17430 等）都有這道判斷，只有這裡漏了。
+          if (
+            backgroundToApply &&
+            (backgroundToApply.startsWith("data:image") ||
+              backgroundToApply.startsWith("http") ||
+              backgroundToApply.startsWith("./") ||
+              backgroundToApply.startsWith("/"))
+          ) {
             chatScreen.style.backgroundImage = `url(${backgroundToApply})`;
+          } else if (backgroundToApply) {
+            // 漸層或其他 CSS background-image 值，直接指定，不要包 url()
+            chatScreen.style.backgroundImage = backgroundToApply;
           } else {
             chatScreen.style.backgroundImage = "none";
           }
@@ -8711,20 +8701,11 @@
           }
 
           // 后续的其他 else if 保持不变
-          else if (msg.type === "user_photo" || msg.type === "ai_image" || msg.type === "naiimag" || msg.type === "image_generation" || msg.type === "gpt_image") {
+          else if (msg.type === "user_photo" || msg.type === "ai_image") {
             bubble.classList.add("is-ai-image");
             const altText =
               msg.type === "user_photo" ? "用户描述的照片" : "AI生成的图片";
-            const imageSrc = msg.imageUrl || msg.url || (typeof msg.content === "string" && /^(data:image\/|https?:\/\/)/i.test(msg.content) ? msg.content : "");
-            if (imageSrc) {
-              contentHtml = `
-                <div class="ai-generated-image-wrap">
-                  <img src="${imageSrc}" class="ai-generated-image" alt="${altText}" data-description="${String(msg.prompt || msg.content || "").replace(/"/g, '&quot;')}">
-                  <button type="button" class="ai-image-save-btn" data-image-src="${String(imageSrc).replace(/"/g, '&quot;')}" title="儲存圖片">⇩ 儲存圖片</button>
-                </div>`;
-            } else {
-              contentHtml = `<div class="ai-image-placeholder">图片生成结果缺失</div>`;
-            }
+            contentHtml = `<img src="https://i.postimg.cc/KYr2qRCK/1.jpg" class="ai-generated-image" alt="${altText}" data-description="${msg.content}">`;
           } else if (msg.type === "voice_message") {
             bubble.classList.add("is-voice-message");
 
@@ -10624,7 +10605,7 @@ ${watchMemories.slice(-24).map((m, i) => `- ${m.text || ""}`).join("\n")}
 			-   **发送文本**: \`{"type": "text", "name": "角色名", "message": "文本内容"}\`
 			-   **【【【全新】】】发送后立刻撤回 (动画效果)**: \`{"type": "send_and_recall", "name": "角色名", "content": "你想让角色说出后立刻消失的话"}\`
 			-   **发送表情**: \`{"type": "sticker", "name": "角色名", "sticker_name": "表情的名字"}\`
-			-   **发送图片（GPT生图）**: 当用户要求你生成图片、画角色/场景、合照或当前剧情明确需要视觉化时，必须使用以下工具指令，而不是发送图片文字描述：\n    \`{"type": "image_generation", "name": "角色名", "prompt": "完整、可直接交给GPT图像生成模型的图片提示词"}\`\n    - \`prompt\` 必须填写，不能为空。\n    - 禁止只输出图片描述、\`ai_image\` 或“我来生成图片”文字。\n    - EPhone 会自动把 Fixed Prompt、Negative Prompt、模型、尺寸等设置交给GPT生图API。\n    - 只有工具实际返回图片后，才视为图片生成成功。
+			-   **发送图片**: \`{"type": "ai_image", "name": "角色名", "description": "图片的详细文字描述"}\`
 			-   **发送语音**: \`{"type": "voice_message", "name": "角色名", "content": "语音的文字内容"}\`
 			-   **新增纪念日**: 当某位角色与用户明确确认生日、在一起纪念日、初遇日、结婚／领证日等日期时，可以使用 \`{"type":"memorial_day","name":"角色本名","title":"我们在一起","date":"2025-06-01","kind":"在一起","annual":true,"description":"第一次正式在一起"}\`。它会保存到 EPhone 共用紀念日，不会发送成聊天气泡。日期不明确时禁止猜测。
 			${
@@ -11072,22 +11053,7 @@ ${libraryList}
 			}
 
 
-			### **【GPT圖片生成工具｜強制規則】**
-
-當使用者要求生成圖片、畫角色、畫場景、合照，或明確要求把目前劇情視覺化時，你必須建立圖片生成工具指令。
-
-工具格式：
-\`{"type":"image_generation","name":"角色名","prompt":"完整圖片生成提示詞"}\`
-
-規則：
-1. \`type\` 必須是 \`image_generation\`。
-2. \`prompt\` 必須存在且不得為空。
-3. \`prompt\` 必須整合角色固定外觀、服裝、動作、表情、場景、人物關係、構圖、視角，以及使用者本次要求。
-4. 禁止只輸出圖片描述、\`ai_image\`、\`naiimag\`文字格式或「我來幫你生成」之類的普通文字。
-5. EPhone 會在收到工具指令後實際呼叫 GPT / OpenAI 圖像生成 API。不要自行編造圖片URL或假裝圖片已生成。
-6. Fixed Prompt、Negative Prompt、Model、Size、Quality、Background 等由 EPhone 設定控制，不需要在工具指令中自行指定。
-
-### **【第三部分：核心对话规则】**
+			### **【第三部分：核心对话规则】**
 
 			**1. 角色一致性**: 你的所有言行举止都必须严格遵循你的角色设定。
 
@@ -11792,53 +11758,13 @@ ${libraryList}
               }
 
               // 如果上面两种情况都没匹配到，但又不是标准数组，就尝试用老方法解析
-              // GPT 生圖工具請求也允許直接回傳單一工具物件，不必包在 chatResponse 陣列裡。
               if (messagesArray.length === 0 && !innerVoiceData) {
-                const directTool = fullResponse && typeof fullResponse === "object"
-                  ? fullResponse
-                  : null;
-                if (
-                  directTool &&
-                  ["image_generation", "naiimag", "gpt_image"].includes(String(directTool.type || "").toLowerCase())
-                ) {
-                  messagesArray = [directTool];
-                } else {
-                  messagesArray = parseAiResponse(aiResponseContent);
-                }
+                messagesArray = parseAiResponse(aiResponseContent);
               }
             } catch (e) {
               console.warn("AI回复不是有效的JSON，退回到标准解析模式。", e);
               messagesArray = parseAiResponse(aiResponseContent);
               console.log(messagesArray);
-            }
-
-            // 自然语言生圖兜底：用户说「我想看你／给我你的照片／拍一张给我看」时，
-            // 即使聊天模型忘记输出工具 JSON，EPhone 也直接把请求交给外接 GPT 生图 API。
-            // 这一步故意放在解析之后、普通文字消息处理之前，避免把“图片请求”退化成文字描述。
-            const ephoneLastUserText = [...chat.history]
-              .reverse()
-              .find(m => m.role === "user" && typeof m.content === "string" && !m.isHidden)?.content || "";
-            const ephoneUserWantsImage = ephoneLooksLikeImageRequest(ephoneLastUserText);
-            const ephoneAIWantsToSendImage = ephoneLooksLikeAIImageShare(aiResponseContent);
-            const ephoneAlreadyHasImageTool = messagesArray.some(m =>
-              ["image_generation", "naiimag", "gpt_image", "ai_image"].includes(String(m?.type || "").toLowerCase())
-            );
-            if ((ephoneUserWantsImage || ephoneAIWantsToSendImage) && !ephoneAlreadyHasImageTool) {
-              try {
-                const autoImage = await ephoneGenerateRequestedChatImage(
-                  chat,
-                  ephoneLastUserText,
-                  aiResponseContent
-                );
-                messagesArray.push(autoImage);
-                console.log("[EPhone GPT生圖] 自然語言圖片請求已自動轉交外接圖片 API。", ephoneLastUserText);
-              } catch (imageError) {
-                console.error("[EPhone GPT生圖] 自然語言圖片請求失敗:", imageError);
-                messagesArray.push({
-                  type: "system_message",
-                  content: `[GPT生圖失敗: ${imageError.message}]`
-                });
-              }
             }
 
             // 最终处理心声数据
@@ -15215,76 +15141,13 @@ ${libraryList}
                   continue;
                 }
 
-                case "image_generation":
-                case "naiimag":
-                case "gpt_image": {
-                  // 真正執行 GPT / OpenAI 生圖，而不是把 prompt 當成普通文字訊息顯示。
-                  const imagePrompt = String(
-                    msgData.prompt || msgData.description || msgData.content || "",
-                  ).trim();
-                  if (!imagePrompt) {
-                    console.warn("AI要求生圖但沒有提供 prompt，已攔截。", msgData);
-                    continue;
-                  }
-
-                  try {
-                    const imageUrl = await window.generateOpenAIImage(imagePrompt);
-                    const imageMessage = {
-                      ...baseMessage,
-                      type: "naiimag",
-                      content: imagePrompt,
-                      prompt: imagePrompt,
-                      imageUrl,
-                    };
-                    chat.history.push(imageMessage);
-
-                    if (!isViewingThisChat || document.hidden) {
-                      showNotification(chatId, "[圖片]", chat.settings.aiAvatar);
-                    }
-                    if (isViewingThisChat) {
-                      appendMessage(imageMessage, chat);
-                      playNotificationSound();
-                    }
-                  } catch (imageError) {
-                    console.error("GPT 生圖失敗:", imageError);
-                    const errorMessage = {
-                      role: "system",
-                      content: `[GPT生圖失敗: ${imageError.message}]`,
-                      timestamp: Date.now(),
-                    };
-                    chat.history.push(errorMessage);
-                    if (isViewingThisChat) appendMessage(errorMessage, chat);
-                  }
-                  // 已經由工具處理完成，不再讓下面的普通 aiMessage 邏輯把它當文字。
-                  continue;
-                }
-
-                case "ai_image": {
-                  // 舊版 ai_image 是「圖片文字描述」。現在統一升級為真正的 GPT 外接生圖，
-                  // 防止模型沿用舊指令而只發一段描述。
-                  const legacyImagePrompt = String(msgData.prompt || msgData.description || msgData.content || "").trim();
-                  if (!legacyImagePrompt) continue;
-                  try {
-                    const generated = await ephoneGenerateRequestedChatImage(
-                      chat,
-                      ephoneLastUserText,
-                      aiResponseContent,
-                      legacyImagePrompt
-                    );
-                    generated.timestamp = Date.now();
-                    chat.history.push(generated);
-                    if (isViewingThisChat) {
-                      appendMessage(generated, chat);
-                      playNotificationSound();
-                    }
-                  } catch (imageError) {
-                    console.error("舊 ai_image 已轉接 GPT 生圖但失敗:", imageError);
-                    const errorMessage = { role: "system", content: `[GPT生圖失敗: ${imageError.message}]`, timestamp: Date.now() };
-                    chat.history.push(errorMessage);
-                    if (isViewingThisChat) appendMessage(errorMessage, chat);
-                  }
-                  continue;
-                }
+                case "ai_image":
+                  aiMessage = {
+                    ...baseMessage,
+                    type: "ai_image",
+                    content: msgData.description,
+                  };
+                  break;
                 case "voice_message":
                   aiMessage = {
                     ...baseMessage,
@@ -37462,136 +37325,6 @@ ${libraryList}
          * @param {object} options - 配置项 { width, height, model, seed, nologo }
          * @returns {Promise<string>} - 返回图片地址 (Blob URL 或 公网 URL)
          */
-        /**
-         * OpenAI GPT Image 生图：与文字聊天 API 分离，读取 API 设置中的独立图片生成配置。
-         * 返回可持久化的 data:image/... Base64。
-         */
-        // ===== GPT 生圖意圖層：把自然聊天用詞轉成真正的外接生圖請求 =====
-        function ephoneLooksLikeImageRequest(text) {
-          const t = String(text || "").replace(/\s+/g, "").toLowerCase();
-          if (!t) return false;
-          const patterns = [
-            /拍一张你们的照片给我看|拍一張你們的照片給我看/,
-            /拍一张照片给我看|拍一張照片給我看/,
-            /拍张照片给我看|拍張照片給我看/,
-            /给我你的照片|給我你的照片/,
-            /给我一张你的照片|給我一張你的照片/,
-            /给我你们的照片|給我你們的照片/,
-            /给你发张照片|給你發張照片/,
-            /发张照片给我|發張照片給我/,
-            /发一张照片给我|發一張照片給我/,
-            /传张照片给我|傳張照片給我/,
-            /传一张照片给我|傳一張照片給我/,
-            /发照片给我|發照片給我/,
-            /传照片给我|傳照片給我/,
-            /给我看看你|給我看看你/,
-            /我想看你(?!说|说话|聊天|的反应|怎么|如何)/,
-            /我想看看你(?!说|说话|聊天|的反应|怎么|如何)/,
-            /想看你一张照片|想看你一張照片/,
-            /想看看你的照片|想看看你的照片/,
-            /想看你的照片|想看你的照片/,
-            /让我看看你|讓我看看你/,
-            /让我看看你的照片|讓我看看你的照片/,
-            /自拍给我|自拍給我/,
-            /给我自拍|給我自拍/,
-            /拍个自拍|拍個自拍/,
-            /拍张自拍|拍張自拍/,
-            /发自拍|發自拍/,
-            /传自拍|傳自拍/,
-            /照片给我|照片給我/,
-            /拍照给我|拍照給我/
-          ];
-          return patterns.some((re) => re.test(t));
-        }
-
-        function ephoneLooksLikeAIImageShare(text) {
-          const t = String(text || "").replace(/\s+/g, "").toLowerCase();
-          if (!t) return false;
-          return /(我给你拍|我給你拍|我拍给你|我拍給你|我发给你一张照片|我發給你一張照片|我给你发张照片|我給你發張照片|给你发张照片|給你發張照片|给你一张照片|給你一張照片|发给你一张照片|發給你一張照片|拍一张给你|拍一張給你)/.test(t);
-        }
-
-        function ephoneBuildCharacterImagePrompt(chat, userRequest, aiResponseText = "") {
-          const st = chat?.settings?.stCharacterData || chat?.stCharacterData || {};
-          const identity = [
-            st.name || chat?.name,
-            st.description,
-            st.personality,
-            st.scenario,
-            chat?.settings?.aiPersona,
-          ].filter(Boolean).join("\n");
-          const recent = (chat?.history || [])
-            .filter(m => !m.isHidden && typeof m.content === "string")
-            .slice(-8)
-            .map(m => `${m.role === "user" ? "User" : (chat?.name || "Character")}: ${m.content}`)
-            .join("\n");
-          return [
-            `Create a natural character photo for ${chat?.name || "the character"}.`,
-            `Character identity and fixed appearance:\n${identity}`,
-            `User's image request:\n${userRequest || "The user wants to see the character."}`,
-            aiResponseText ? `Character's intended response/context:\n${aiResponseText}` : "",
-            `Recent conversation context:\n${recent}`,
-            "The character must remain visually consistent with their established identity. Do not invent a different person. Compose the image as an actual photograph/selfie appropriate to the conversation unless the user's request specifies another visual style."
-          ].filter(Boolean).join("\n\n");
-        }
-
-        async function ephoneGenerateRequestedChatImage(chat, userRequest, aiResponseText = "", providedPrompt = "") {
-          const prompt = String(providedPrompt || "").trim() || ephoneBuildCharacterImagePrompt(chat, userRequest, aiResponseText);
-          const imageUrl = await window.generateOpenAIImage(prompt);
-          return {
-            type: "naiimag",
-            content: prompt,
-            prompt,
-            imageUrl,
-            timestamp: Date.now(),
-            role: "assistant",
-            senderName: chat?.name,
-            gptImage: true,
-            sourceType: "gpt_image_generation"
-          };
-        }
-
-        window.generateOpenAIImage = async function (prompt, options = {}) {
-          const cfg = (window.state && window.state.apiConfig) || {};
-          const baseUrl = String(options.baseUrl || cfg.openaiImageBaseUrl || "https://api.openai.com/v1").replace(/\/$/, "");
-          const apiKey = options.apiKey || cfg.openaiImageApiKey || "";
-          const model = options.model || cfg.openaiImageModel || "gpt-image-2";
-          if (!apiKey) throw new Error("尚未填写 ChatGPT / OpenAI 生圖 API Key");
-          const rawPrompt = String(prompt || "").trim();
-          const fixedPrompt = String(options.fixedPrompt ?? cfg.openaiImageFixedPrompt ?? "").trim();
-          const negativePrompt = String(options.negativePrompt ?? cfg.openaiImageNegativePrompt ?? "").trim();
-          const promptParts = [rawPrompt, fixedPrompt];
-          if (negativePrompt) promptParts.push(`Avoid / negative constraints: ${negativePrompt}`);
-          const finalPrompt = promptParts.filter(Boolean).join("\n\n").trim();
-          const body = {
-            model,
-            prompt: finalPrompt,
-            n: 1,
-            size: options.size || cfg.openaiImageSize || "1024x1024",
-            quality: options.quality || cfg.openaiImageQuality || "auto",
-            background: options.background || cfg.openaiImageBackground || "auto",
-          };
-          if (!body.prompt) throw new Error("生圖提示詞不能为空");
-          const response = await fetch(`${baseUrl}/images/generations`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify(body),
-          });
-          const data = await response.json().catch(() => ({}));
-          if (!response.ok) {
-            const detail = data?.error?.message || data?.message || `HTTP ${response.status}`;
-            throw new Error(detail);
-          }
-          const item = data?.data?.[0];
-          if (item?.b64_json) {
-            return `data:image/png;base64,${item.b64_json}`;
-          }
-          if (item?.url) return item.url;
-          throw new Error("OpenAI 生图接口没有返回图片数据");
-        };
-
         window.generatePollinationsImage = async function (
           prompt,
           options = {},
@@ -37608,12 +37341,6 @@ ${libraryList}
             `[Global Image Gen] Prompt: ${prompt}, Options:`,
             options,
           );
-
-          // 统一生图入口：如果用户在 API 设置中选择 OpenAI，则沿用现有调用方，
-          // 无需把每个旧功能逐一改写。
-          if ((window.state?.apiConfig?.imageGenerationProvider || "pollinations") === "openai") {
-            return await window.generateOpenAIImage(prompt, options);
-          }
 
           while (true) {
             try {
@@ -38118,6 +37845,7 @@ ${libraryList}
           window.showScreen = showScreen;
           window.openLoversSpaceFromCard = openLoversSpaceFromCard;
           window.renderChatListProxy = renderChatList;
+          window.renderChatInterfaceProxy = renderChatInterface;
           window.renderApiSettingsProxy = renderApiSettings;
           window.renderWallpaperScreenProxy = renderWallpaperScreen;
           window.renderWorldBookScreenProxy = renderWorldBookScreen;
@@ -39099,24 +38827,6 @@ ${libraryList}
               state.apiConfig.pollinationsApiKey = document
                 .getElementById("pollinations-api-key")
                 .value.trim();
-              const imageProvider = document.getElementById("image-generation-provider");
-              if (imageProvider) state.apiConfig.imageGenerationProvider = imageProvider.value;
-              const openaiBase = document.getElementById("openai-image-base-url");
-              if (openaiBase) state.apiConfig.openaiImageBaseUrl = openaiBase.value.trim() || "https://api.openai.com/v1";
-              const openaiKey = document.getElementById("openai-image-api-key");
-              if (openaiKey) state.apiConfig.openaiImageApiKey = openaiKey.value.trim();
-              const openaiModel = document.getElementById("openai-image-model");
-              if (openaiModel) state.apiConfig.openaiImageModel = openaiModel.value.trim() || "gpt-image-2";
-              const openaiFixedPrompt = document.getElementById("openai-image-fixed-prompt");
-              if (openaiFixedPrompt) state.apiConfig.openaiImageFixedPrompt = openaiFixedPrompt.value.trim();
-              const openaiNegativePrompt = document.getElementById("openai-image-negative-prompt");
-              if (openaiNegativePrompt) state.apiConfig.openaiImageNegativePrompt = openaiNegativePrompt.value.trim();
-              const openaiSize = document.getElementById("openai-image-size");
-              if (openaiSize) state.apiConfig.openaiImageSize = openaiSize.value;
-              const openaiQuality = document.getElementById("openai-image-quality");
-              if (openaiQuality) state.apiConfig.openaiImageQuality = openaiQuality.value;
-              const openaiBackground = document.getElementById("openai-image-background");
-              if (openaiBackground) state.apiConfig.openaiImageBackground = openaiBackground.value;
 
               // 如果开启了自动备份，立即重启定时器
               handleAutoBackupTimer();
@@ -39198,93 +38908,6 @@ ${libraryList}
               }
               alert("API设置已保存!");
             });
-
-          // ChatGPT / OpenAI 生图服务选择与测试
-          const imageProviderSelect = document.getElementById("image-generation-provider");
-          if (imageProviderSelect) {
-            imageProviderSelect.addEventListener("change", () => {
-              const details = document.getElementById("openai-image-details");
-              if (details) details.style.display = imageProviderSelect.value === "openai" ? "block" : "none";
-            });
-          }
-          const openaiModelsBtn = document.getElementById("openai-image-models-btn");
-          if (openaiModelsBtn) {
-            openaiModelsBtn.addEventListener("click", async () => {
-              const status = document.getElementById("openai-image-models-status");
-              const baseInput = document.getElementById("openai-image-base-url");
-              const keyInput = document.getElementById("openai-image-api-key");
-              const modelInput = document.getElementById("openai-image-model");
-              const modelSelect = document.getElementById("openai-image-model-select");
-              const baseUrl = (baseInput?.value || "https://api.openai.com/v1").trim().replace(/\/$/, "");
-              const apiKey = (keyInput?.value || "").trim();
-              if (!apiKey) { if (status) status.textContent = "❌ 請先填寫 API Key。"; return; }
-              const oldText = openaiModelsBtn.textContent;
-              openaiModelsBtn.disabled = true;
-              openaiModelsBtn.textContent = "⏳ 拉取中…";
-              if (status) status.textContent = "正在取得 /models…";
-              try {
-                const response = await fetch(`${baseUrl}/models`, { headers: { Authorization: `Bearer ${apiKey}` } });
-                const data = await response.json().catch(() => ({}));
-                if (!response.ok) throw new Error(data?.error?.message || data?.message || `HTTP ${response.status}`);
-                const models = Array.isArray(data?.data) ? data.data : [];
-                if (!models.length) throw new Error("API 沒有返回模型清單");
-                const imageKeywords = /(image|dall-e|gpt-image|vision)/i;
-                const imageModels = models.filter(m => imageKeywords.test(String(m?.id || "")));
-                const usable = imageModels.length ? imageModels : models;
-                usable.sort((a,b) => String(a.id).localeCompare(String(b.id)));
-                if (modelSelect) {
-                  modelSelect.innerHTML = "";
-                  usable.forEach(m => {
-                    const opt = document.createElement("option");
-                    opt.value = m.id; opt.textContent = m.id;
-                    modelSelect.appendChild(opt);
-                  });
-                  modelSelect.style.display = "block";
-                  if (modelInput) { modelSelect.value = modelInput.value || usable[0].id; modelInput.value = modelSelect.value; modelInput.style.display = "none"; }
-                  modelSelect.onchange = () => { if (modelInput) modelInput.value = modelSelect.value; };
-                }
-                if (status) status.textContent = `✅ 找到 ${models.length} 個模型，其中 ${imageModels.length} 個看起來與圖片相關。已顯示可用清單。`;
-              } catch (error) {
-                console.error("拉取 OpenAI 模型失敗:", error);
-                if (status) status.textContent = `❌ ${error.message}`;
-              } finally {
-                openaiModelsBtn.disabled = false;
-                openaiModelsBtn.textContent = oldText;
-              }
-            });
-          }
-
-          const openaiImageTestBtn = document.getElementById("openai-image-test-btn");
-          if (openaiImageTestBtn) {
-            openaiImageTestBtn.addEventListener("click", async () => {
-              const status = document.getElementById("openai-image-test-status");
-              const result = document.getElementById("openai-image-test-result");
-              const prompt = document.getElementById("openai-image-test-prompt")?.value.trim() || "一位精緻的動漫少年坐在窗邊，柔和夜景，電影感光影";
-              const oldText = openaiImageTestBtn.textContent;
-              openaiImageTestBtn.disabled = true;
-              openaiImageTestBtn.textContent = "⏳ 生成中…";
-              if (status) status.textContent = "正在連線到圖片生成 API…";
-              if (result) result.style.display = "none";
-              try {
-                const image = await window.generateOpenAIImage(prompt, {
-                  baseUrl: document.getElementById("openai-image-base-url")?.value.trim(),
-                  apiKey: document.getElementById("openai-image-api-key")?.value.trim(),
-                  model: document.getElementById("openai-image-model")?.value.trim(),
-                  size: document.getElementById("openai-image-size")?.value,
-                  quality: document.getElementById("openai-image-quality")?.value,
-                  background: document.getElementById("openai-image-background")?.value,
-                });
-                if (result) { result.src = image; result.style.display = "block"; }
-                if (status) status.textContent = "✅ 生圖成功。記得按下方「保存 API 设置」保存設定。";
-              } catch (error) {
-                console.error("OpenAI 生圖測試失敗:", error);
-                if (status) status.textContent = `❌ ${error.message}`;
-              } finally {
-                openaiImageTestBtn.disabled = false;
-                openaiImageTestBtn.textContent = oldText;
-              }
-            });
-          }
 
           // gemini 密钥聚焦的时候显示明文
           const ApiKeyInput = document.getElementById("api-key");
@@ -39760,48 +39383,6 @@ ${libraryList}
               }
 
               // --- 你原来的其他点击事件逻辑 ---
-              const saveAiImage = e.target.closest(".ai-image-save-btn");
-              if (saveAiImage) {
-                e.preventDefault();
-                e.stopPropagation();
-                const src = saveAiImage.dataset.imageSrc || saveAiImage.closest(".ai-generated-image-wrap")?.querySelector(".ai-generated-image")?.src;
-                if (!src) return;
-                const chatName = (state.chats?.[state.activeChatId]?.name || "AI").replace(/[\\/:*?"<>|]/g, "_");
-                const filename = `${chatName}_AI_${new Date().toISOString().slice(0,10)}_${Date.now()}.png`;
-                saveAiImage.disabled = true;
-                const original = saveAiImage.textContent;
-                saveAiImage.textContent = "儲存中…";
-                (async () => {
-                  try {
-                    let blob;
-                    if (/^data:image\//i.test(src)) {
-                      const response = await fetch(src);
-                      blob = await response.blob();
-                    } else {
-                      const response = await fetch(src, { mode: "cors" });
-                      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                      blob = await response.blob();
-                    }
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = filename;
-                    a.rel = "noopener";
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    setTimeout(() => URL.revokeObjectURL(url), 1500);
-                    saveAiImage.textContent = "✓ 已儲存";
-                  } catch (err) {
-                    console.error("AI 圖片儲存失敗", err);
-                    try { window.open(src, "_blank", "noopener"); } catch (_) {}
-                    saveAiImage.textContent = "請長按圖片儲存";
-                  } finally {
-                    setTimeout(() => { saveAiImage.disabled = false; saveAiImage.textContent = original; }, 1800);
-                  }
-                })();
-                return;
-              }
               const aiImage = e.target.closest(".ai-generated-image");
               if (aiImage) {
                 const description = aiImage.dataset.description;

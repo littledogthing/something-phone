@@ -24,57 +24,268 @@
    * 正式版會換成完整的 5,619 張。
    * ======================================================================*/
   var SEED = {
-    '生活碎片': [
-      '剛剛整理了一下桌子', '把昨天的衣服收了', '窗外有人在遛狗',
-      '換了一組床單', '剛把垃圾拿出去', '桌上的杯子又空了',
-      '剛剛發現抽屜裡還有一包餅乾', '把書架重新排了一次',
-      '剛剛在陽台站了一會', '燈泡好像快不行了', '收到一個包裹，是上週買的',
-      '剛剛把行事曆翻到下個月', '牆上的日曆忘記撕了', '剛擦完地板',
-      '手機只剩百分之十五', '把窗戶打開透氣', '椅子坐久了有點硬',
-      '剛剛整理相簿，翻到很久以前的照片'
-    ],
-    '我的一天': [
-      '今天起得比平常早', '早上出門的時候路上很空', '上午的事情比想像中順利',
-      '中午沒什麼胃口', '下午整個人都很鈍', '開了一個很長的會',
-      '剛剛才忙完', '今天一整天都在跑來跑去', '晚上比較有空',
-      '今天比昨天好一點', '剛回到家', '今天什麼都沒做成',
-      '下午睡了一下，結果更累', '今天時間過得特別慢', '剛洗完澡',
-      '準備收工了'
-    ],
-    '吃東西': [
-      '中午吃了麵', '剛剛煮了東西吃', '買了一杯咖啡',
-      '冰箱裡沒東西了', '今天想吃點清淡的', '剛剛吃太飽',
-      '晚餐還沒決定', '樓下那家今天沒開', '買了水果回來',
-      '剛剛喝了一杯水', '泡了一杯茶', '昨天的剩菜熱來吃',
-      '好像有點餓了', '早餐只吃了一半', '買到很好吃的麵包'
-    ],
-    '天氣': [
-      '外面開始下雨了', '今天風很大', '天氣轉涼了',
-      '太陽很大，出門記得遮一下', '剛剛雨停了', '今天的空氣很乾',
-      '早上起來霧很重', '晚上比白天冷很多', '衣服曬不乾',
-      '今天悶悶的', '天空的顏色很好看', '好像要變天了'
-    ],
-    '關心你': [
-      '你今天忙嗎', '記得喝水', '別坐太久',
-      '事情做完再休息', '吃飯了嗎', '不要撐太晚',
-      '今天過得怎麼樣', '累的話就先放著', '晚點再處理也可以',
-      '你聲音聽起來有點累', '有好好吃東西嗎', '早點睡',
-      '需要的話跟我說', '別把自己逼太緊'
-    ],
-    '隨口回應': [
-      '嗯', '我在', '知道了',
-      '好', '我看看', '原來是這樣',
-      '真的假的', '我也這樣覺得', '有道理',
-      '還不錯', '沒想到', '那還好',
-      '我懂', '可以', '聽起來不錯',
-      '再說吧'
-    ],
-    '想你': [
-      '剛剛突然想到你', '在做什麼', '有點想找你說話',
-      '今天想起你說過的一句話', '不知道你那邊現在幾點',
-      '看到一個東西覺得你會喜歡', '有空的話聊一下',
-      '你最近好像很忙', '想聽你說說今天的事', '沒事，就是想找你'
-    ]
+    "主字卡": {
+      "生活碎片": [
+        "剛剛整理了一下桌子",
+        "把昨天的衣服收了",
+        "窗外有人在遛狗",
+        "換了一組床單",
+        "剛把垃圾拿出去",
+        "桌上的杯子又空了",
+        "剛剛發現抽屜裡還有一包餅乾",
+        "把書架重新排了一次",
+        "剛剛在陽台站了一會",
+        "燈泡好像快不行了",
+        "收到一個包裹，是上週買的",
+        "剛剛把行事曆翻到下個月",
+        "牆上的日曆忘記撕了",
+        "剛擦完地板",
+        "手機只剩百分之十五",
+        "把窗戶打開透氣",
+        "椅子坐久了有點硬",
+        "剛剛整理相簿，翻到很久以前的照片"
+      ],
+      "我的一天": [
+        "今天起得比平常早",
+        "早上出門的時候路上很空",
+        "上午的事情比想像中順利",
+        "中午沒什麼胃口",
+        "下午整個人都很鈍",
+        "開了一個很長的會",
+        "剛剛才忙完",
+        "今天一整天都在跑來跑去",
+        "晚上比較有空",
+        "今天比昨天好一點",
+        "剛回到家",
+        "今天什麼都沒做成",
+        "下午睡了一下，結果更累",
+        "今天時間過得特別慢",
+        "剛洗完澡",
+        "準備收工了"
+      ],
+      "吃東西": [
+        "中午吃了麵",
+        "剛剛煮了東西吃",
+        "買了一杯咖啡",
+        "冰箱裡沒東西了",
+        "今天想吃點清淡的",
+        "剛剛吃太飽",
+        "晚餐還沒決定",
+        "樓下那家今天沒開",
+        "買了水果回來",
+        "剛剛喝了一杯水",
+        "泡了一杯茶",
+        "昨天的剩菜熱來吃",
+        "好像有點餓了",
+        "早餐只吃了一半",
+        "買到很好吃的麵包"
+      ],
+      "天氣": [
+        "外面開始下雨了",
+        "今天風很大",
+        "天氣轉涼了",
+        "太陽很大，出門記得遮一下",
+        "剛剛雨停了",
+        "今天的空氣很乾",
+        "早上起來霧很重",
+        "晚上比白天冷很多",
+        "衣服曬不乾",
+        "今天悶悶的",
+        "天空的顏色很好看",
+        "好像要變天了"
+      ],
+      "關心你": [
+        "你今天忙嗎",
+        "記得喝水",
+        "別坐太久",
+        "事情做完再休息",
+        "吃飯了嗎",
+        "不要撐太晚",
+        "今天過得怎麼樣",
+        "累的話就先放著",
+        "晚點再處理也可以",
+        "你聲音聽起來有點累",
+        "有好好吃東西嗎",
+        "早點睡",
+        "需要的話跟我說",
+        "別把自己逼太緊"
+      ],
+      "隨口回應": [
+        "嗯",
+        "我在",
+        "知道了",
+        "好",
+        "我看看",
+        "原來是這樣",
+        "真的假的",
+        "我也這樣覺得",
+        "有道理",
+        "還不錯",
+        "沒想到",
+        "那還好",
+        "我懂",
+        "可以",
+        "聽起來不錯",
+        "再說吧"
+      ],
+      "想你": [
+        "剛剛突然想到你",
+        "在做什麼",
+        "有點想找你說話",
+        "今天想起你說過的一句話",
+        "不知道你那邊現在幾點",
+        "看到一個東西覺得你會喜歡",
+        "有空的話聊一下",
+        "你最近好像很忙",
+        "想聽你說說今天的事",
+        "沒事，就是想找你"
+      ]
+    },
+    "顏文字": {
+      "開心": [
+        "(￣▽￣)",
+        "(*´▽`*)",
+        "(*´ω｀*)",
+        "(≧▽≦)",
+        "(≧∇≦)",
+        "(◎•ω•◎)",
+        "(◠_◠)",
+        "(´▽｀)"
+      ],
+      "溫柔": [
+        "(｡•ω•｡)",
+        "(◕ω◕✿)",
+        "(*￣_￣)",
+        "(*¯_¯*)",
+        "(o˘°˘o)",
+        "(๑´ω`๑)",
+        "(人 •ω•)",
+        "(｡◕_◕｡)"
+      ],
+      "撒嬌": [
+        "(´,,•ω•,,)",
+        "(⁄ ⁄>⁄ ▽ ⁄<⁄ ⁄)",
+        "(*/ω＼*)",
+        "(〃▽〃)",
+        "(〃ω〃)",
+        "(๑>°<๑)",
+        "(,,•_•,,)",
+        "(´,,•_•,,)"
+      ],
+      "抱抱": [
+        "(づ｡◕__◕｡)づ",
+        "(つ≧▽≦)つ",
+        "(っ´▽`)っ",
+        "(っ˘ω˘ς )",
+        "(っ´ω`)ﾉ(╥ω╥)",
+        "(過來)",
+        "(抱一下)",
+        "(讓我抱)"
+      ],
+      "親親": [
+        "(￣3￣)",
+        "(´ε｀ )",
+        "(づ￣ ³￣)づ",
+        "(っ˘з(˘⌣˘ )",
+        "( ˘ ³˘)♥",
+        "(๑ơ 3 ơ)♥",
+        "(๑˘_˘๑)",
+        "(*˘_˘*).｡.:*"
+      ],
+      "害羞": [
+        "(,,> <,,)",
+        "(๑•́ 3 •̀๑)",
+        "(⁄ ⁄•⁄ω⁄•⁄ ⁄)",
+        "(´,,•_•,,)",
+        "(*/ω＼*)",
+        "(///▽///)",
+        "(////)",
+        "(臉紅)"
+      ]
+    },
+    "Emoji": {
+      "表情": [
+        "🙂",
+        "😊",
+        "☺️",
+        "😌",
+        "🥹",
+        "🥺",
+        "🥰",
+        "😗",
+        "😘",
+        "😋",
+        "😎",
+        "😉",
+        "🤔",
+        "🫡"
+      ],
+      "手勢": [
+        "👋🏻",
+        "👍🏻",
+        "👎🏻",
+        "👌🏻",
+        "✌🏻",
+        "🤏🏻",
+        "🙏🏻",
+        "🫶🏻",
+        "💪🏻",
+        "✍🏻",
+        "👉🏻",
+        "👉👈",
+        "👉🏻👈🏻",
+        "🤲🏻"
+      ],
+      "愛心": [
+        "💖",
+        "💓",
+        "💞",
+        "💝",
+        "❤️‍🩹",
+        "🩷",
+        "🤍",
+        "✨"
+      ],
+      "花草自然": [
+        "🌸",
+        "🌷",
+        "🌹",
+        "💐",
+        "🥀",
+        "🌼",
+        "🏵️",
+        "🍀",
+        "☀️",
+        "🌙",
+        "⭐"
+      ]
+    },
+    "拍一拍": {
+      "哄你": [
+        "好了",
+        "過來讓我哄一下",
+        "別生氣了",
+        "先聽我說",
+        "如果是我的問題",
+        "我會改",
+        "如果你難過",
+        "我想陪著你",
+        "給你買喜歡的東西",
+        "或者抱抱你"
+      ],
+      "預設拍一拍": [
+        "輕輕拍了拍你",
+        "摸了摸你的頭",
+        "戳了戳你的臉",
+        "捏了捏你的臉",
+        "彈了彈你的腦門",
+        "揉了揉你的頭髮",
+        "抱抱你",
+        "親了親你",
+        "蹭了蹭你",
+        "拍了拍你的頭，說乖"
+      ]
+    }
   };
 
   /* ========================================================================
@@ -90,6 +301,8 @@
     });
   };
   var rnd = function (arr) { return arr[Math.floor(Math.random() * arr.length)]; };
+  // 分組的唯一鍵：大分類／小分類。不同大分類下可以有同名小分類。
+  var gkey = function (c) { return (c.cat || '主字卡') + '/' + c.grp; };
   var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
   var hhmm = function (ts) {
     var d = new Date(ts);
@@ -101,7 +314,8 @@
     el.className = 'cc-toast';
     el.textContent = msg;
     document.body.appendChild(el);
-    requestAnimationFrame(function () { el.classList.add('show'); });
+    // 用 setTimeout 而非 requestAnimationFrame：背景分頁不會觸發 rAF，提示會永遠不顯示
+    setTimeout(function () { el.classList.add('show'); }, 20);
     setTimeout(function () {
       el.classList.remove('show');
       setTimeout(function () { el.remove(); }, 250);
@@ -132,6 +346,19 @@
       msgs: '++id, charId, ts',
       meta: '&k'
     });
+    // v2：字卡加上「大分類 cat」與「單卡停用 off」。
+    // 舊資料（只有 grp）一律歸到主字卡，不會掉東西。
+    db.version(2).stores({
+      chars: '&id, name',
+      cards: '++id, cat, grp',
+      msgs: '++id, charId, ts',
+      meta: '&k'
+    }).upgrade(function (tx) {
+      return tx.table('cards').toCollection().modify(function (c) {
+        if (!c.cat) c.cat = '主字卡';
+        if (c.off === undefined) c.off = 0;
+      });
+    });
     return db.open();
   }
 
@@ -148,8 +375,12 @@
     var n = await db.cards.count();
     if (n > 0) return;
     var rows = [];
-    Object.keys(SEED).forEach(function (grp) {
-      SEED[grp].forEach(function (text) { rows.push({ grp: grp, text: text }); });
+    Object.keys(SEED).forEach(function (cat) {
+      Object.keys(SEED[cat]).forEach(function (grp) {
+        SEED[cat][grp].forEach(function (text) {
+          rows.push({ cat: cat, grp: grp, text: text, off: 0 });
+        });
+      });
     });
     await db.cards.bulkAdd(rows);
   }
@@ -167,7 +398,10 @@
   async function rebuildPool() {
     var all = await db.cards.toArray();
     pool = all
-      .filter(function (c) { return cfg.offGroups.indexOf(c.grp) === -1; })
+      .filter(function (c) {
+        if (c.off) return false;                        // 單張被關掉
+        return cfg.offGroups.indexOf(gkey(c)) === -1;   // 整組被關掉
+      })
       .map(function (c) { return c.text; });
   }
 
@@ -209,7 +443,9 @@
    * ======================================================================*/
   var view = 'list';       // list | chat | cards | settings
   var activeCharId = null;
-  var activeGroup = null;
+  var activeCat = '';      // '' = 總字卡（全部大分類）
+  var activeGrp = '';      // '' = 該大分類下的全部小分類
+  var q = '';              // 字卡庫搜尋字串
   var replying = false;
 
   /* ========================================================================
@@ -294,6 +530,37 @@
   transition:.22s; pointer-events:none; max-width:82vw; text-align:center; }
 .cc-toast.show { opacity:1; transform:translate(-50%,0); }
 
+/* ---- 兩層分類滑塊 ---- */
+#${SCREEN_ID} .cc-pills { display:flex; gap:7px; overflow-x:auto; overflow-y:hidden;
+  -webkit-overflow-scrolling:touch; scrollbar-width:none;
+  padding:11px 14px; white-space:nowrap; }
+#${SCREEN_ID} .cc-pills::-webkit-scrollbar { display:none; }
+#${SCREEN_ID} .cc-pills.sub { padding-top:0; }
+.cc-pill { flex:0 0 auto; border:1px solid var(--border-color,#e0e0e0);
+  background:transparent; color:var(--text-secondary,#8a8a8a);
+  border-radius:999px; padding:7px 14px; font-size:14px; font-family:inherit;
+  cursor:pointer; transition:background .15s,color .15s,border-color .15s; }
+.cc-pill.on { background:var(--accent-color,#007bff); border-color:var(--accent-color,#007bff);
+  color:#fff; font-weight:500; }
+.cc-pill.muted:not(.on) { opacity:.45; text-decoration:line-through; }
+.cc-pills.sub .cc-pill { font-size:13.5px; padding:6px 12px; }
+
+/* ---- 搜尋 / 統計 ---- */
+.cc-searchbar { padding:0 14px 10px; }
+.cc-searchbar input { width:100%; border:1px solid var(--border-color,#e0e0e0);
+  border-radius:10px; padding:9px 12px; font:inherit; font-size:14.5px;
+  background:#f5f5f7; color:var(--text-primary,#1f1f1f); }
+.cc-searchbar input:focus { outline:none; border-color:var(--accent-color,#007bff); }
+.cc-stat { padding:0 15px 10px; font-size:12.5px; color:var(--text-secondary,#8a8a8a); }
+.cc-from { font-size:11.5px; color:var(--text-secondary,#8a8a8a); margin:10px 0 4px 2px; }
+
+/* ---- 單張字卡：可停用、可刪除 ---- */
+.cc-card { align-items:center; }
+.cc-card.off span { color:var(--text-secondary,#8a8a8a); text-decoration:line-through; }
+.cc-chk { flex:0 0 auto; width:19px; height:19px; accent-color:var(--accent-color,#007bff);
+  margin:0; cursor:pointer; }
+.cc-row .cc-chk { margin-right:4px; }
+
 .cc-hd-act { font-size:14px; color:var(--accent-color,#007bff);
   cursor:pointer; padding:2px 4px; }
 .cc-sec { font-size:12px; color:var(--text-secondary,#8a8a8a);
@@ -333,20 +600,33 @@
     return true;
   }
 
+  // 掛到第三頁（EPhone 共用空間），跟共用行事曆／字卡／雙人狀態／共同觀影同一頁。
+  // 作法完全比照 ephone-watch.js 的 installButton()：插進 .ephone-third-apps，
+  // 並保留重試——第三頁不一定在 DOMContentLoaded 當下就存在。
   function injectIcon() {
-    if (document.getElementById('cc-app-icon')) return;
-    var box = document.getElementById('desktop-app-container');
-    if (!box) return false;
-    var el = document.createElement('div');
-    el.className = 'desktop-app-icon';
-    el.id = 'cc-app-icon';
-    el.innerHTML =
-      '<div class="icon-bg-desktop" style="display:flex;align-items:center;' +
-      'justify-content:center;font-size:26px;background:#eceae4;">🗂️</div>' +
-      '<span class="label">' + APP_LABEL + '</span>';
-    el.addEventListener('click', open);
-    box.appendChild(el);
+    if (document.getElementById('cc-app-btn')) return true;
+    var host = document.querySelector('.ephone-third-apps');
+    if (!host) return false;
+    var b = document.createElement('button');
+    b.id = 'cc-app-btn';
+    b.className = 'ephone-third-app';
+    b.type = 'button';
+    b.innerHTML =
+      '<span class="ephone-third-icon" aria-hidden="true">🗂</span>' +
+      '<span class="ephone-third-app-name">' + APP_LABEL + '</span>' +
+      '<span class="ephone-third-app-desc">不用 AI，角色從字卡池抽卡回你</span>';
+    b.addEventListener('click', open);
+    host.appendChild(b);
     return true;
+  }
+
+  // 第三頁可能被宿主延後渲染或重繪，所以隔一段時間再確認幾次。
+  function keepIcon() {
+    var tries = 0;
+    var t = setInterval(function () {
+      tries++;
+      if (injectIcon() || tries > 20) clearInterval(t);
+    }, 500);
   }
 
   /* ========================================================================
@@ -364,15 +644,19 @@
   function go(v, arg) {
     view = v;
     if (v === 'chat') activeCharId = arg || activeCharId;
-    if (v === 'cards' && arg !== undefined) activeGroup = arg;
+    if (v === 'cards' && arg === 'reset') { activeCat = ''; activeGrp = ''; q = ''; }
     render();
   }
 
   function back() {
-    if (view === 'chat' || view === 'cards' || view === 'settings') {
-      if (view === 'cards' && activeGroup) { activeGroup = null; return go('cards'); }
+    if (view === 'cards') {
+      // 字卡庫逐層退回：字卡 → 小分類 → 大分類 → 角色列表
+      if (q) { q = ''; return render(); }
+      if (activeGrp) { activeGrp = ''; return render(); }
+      if (activeCat) { activeCat = ''; return render(); }
       return go('list');
     }
+    if (view === 'chat' || view === 'settings') return go('list');
     if (typeof window.showScreen === 'function') window.showScreen('home-screen');
   }
 
@@ -434,7 +718,7 @@
       body.querySelectorAll('[data-char]').forEach(function (el) {
         el.onclick = function () { go('chat', el.dataset.char); };
       });
-      body.querySelector('[data-go="cards"]').onclick = function () { activeGroup = null; go('cards'); };
+      body.querySelector('[data-go="cards"]').onclick = function () { go('cards', 'reset'); };
       body.querySelector('[data-go="settings"]').onclick = function () { go('settings'); };
       return;
     }
@@ -464,60 +748,155 @@
     }
 
     if (view === 'cards') {
-      if (!activeGroup) {
-        title.textContent = '字卡庫';
-        act.textContent = '＋組';
-        act.onclick = addGroup;
-        var all = await db.cards.toArray();
-        var byGrp = {};
-        all.forEach(function (c) { byGrp[c.grp] = (byGrp[c.grp] || 0) + 1; });
-        var names = Object.keys(byGrp).sort();
-        var g = '';
-        if (!names.length) g = '<div class="cc-empty">字卡庫是空的。</div>';
-        names.forEach(function (n) {
-          var off = cfg.offGroups.indexOf(n) !== -1;
-          g += '<div class="cc-row" data-grp="' + esc(n) + '">' +
-            '<div class="cc-row-main"><div class="cc-row-name">' + esc(n) +
-              (off ? '　<span style="font-size:12px;color:#d9534f">已關閉</span>' : '') + '</div>' +
-            '<div class="cc-row-sub">' + byGrp[n] + ' 張</div></div>' +
+      var all = await db.cards.toArray();
+      var cats = [];
+      all.forEach(function (c) {
+        var k = c.cat || '主字卡';
+        if (cats.indexOf(k) === -1) cats.push(k);
+      });
+      cats.sort();
+
+      // ---- 大分類滑塊：第一顆固定是「總字卡」----
+      var h = '<div class="cc-pills" id="cc-cats"><button class="cc-pill' +
+        (activeCat ? '' : ' on') + '" data-cat="">總字卡 ' + all.length + '</button>';
+      cats.forEach(function (k) {
+        var n = all.filter(function (c) { return (c.cat || '主字卡') === k; }).length;
+        h += '<button class="cc-pill' + (activeCat === k ? ' on' : '') +
+          '" data-cat="' + esc(k) + '">' + esc(k) + ' ' + n + '</button>';
+      });
+      h += '</div>';
+
+      // ---- 小分類滑塊：選了大分類才出現 ----
+      var scope = activeCat
+        ? all.filter(function (c) { return (c.cat || '主字卡') === activeCat; })
+        : all;
+      if (activeCat) {
+        var grps = [];
+        scope.forEach(function (c) { if (grps.indexOf(c.grp) === -1) grps.push(c.grp); });
+        h += '<div class="cc-pills sub" id="cc-grps"><button class="cc-pill' +
+          (activeGrp ? '' : ' on') + '" data-grp="">全部</button>';
+        grps.forEach(function (g) {
+          var n = scope.filter(function (c) { return c.grp === g; }).length;
+          var off = cfg.offGroups.indexOf(activeCat + '/' + g) !== -1;
+          h += '<button class="cc-pill' + (activeGrp === g ? ' on' : '') +
+            (off ? ' muted' : '') + '" data-grp="' + esc(g) + '">' + esc(g) + ' ' + n + '</button>';
+        });
+        h += '</div>';
+      }
+
+      h += '<div class="cc-searchbar"><input type="search" id="cc-q" placeholder="搜尋字卡內容" value="' +
+        esc(q) + '"></div>';
+
+      title.textContent = activeGrp || activeCat || '字卡庫';
+      act.textContent = '＋';
+      act.onclick = addCard;
+
+      var live = scope.filter(function (c) {
+        return !c.off && cfg.offGroups.indexOf(gkey(c)) === -1;
+      }).length;
+      h += '<div class="cc-stat">' + scope.length + ' 張，其中 ' + live + ' 張在抽卡池</div>';
+
+      function cardRow(c) {
+        return '<div class="cc-card' + (c.off ? ' off' : '') + '">' +
+          '<input type="checkbox" class="cc-chk" data-tg="' + c.id + '"' + (c.off ? '' : ' checked') + '>' +
+          '<span>' + esc(c.text) + '</span>' +
+          '<span class="cc-del" data-del="' + c.id + '">×</span></div>';
+      }
+
+      if (q) {
+        // ---- 搜尋模式：跨分組列出符合的字卡 ----
+        var hits = scope.filter(function (c) { return c.text.indexOf(q) !== -1; });
+        h += '<div class="cc-pad">';
+        if (!hits.length) h += '<div class="cc-empty">沒有符合的字卡。</div>';
+        hits.slice(0, 300).forEach(function (c) {
+          h += '<div class="cc-from">' + esc((c.cat || '主字卡') + ' · ' + c.grp) + '</div>' + cardRow(c);
+        });
+        if (hits.length > 300) h += '<div class="cc-empty">還有 ' + (hits.length - 300) + ' 張，請縮小搜尋範圍。</div>';
+        h += '</div>';
+
+      } else if (!activeCat) {
+        // ---- 總字卡：列出各大分類 ----
+        if (!cats.length) h += '<div class="cc-empty">字卡庫是空的。<br>點右上角的 ＋ 新增。</div>';
+        cats.forEach(function (k) {
+          var sub = all.filter(function (c) { return (c.cat || '主字卡') === k; });
+          var gs = [];
+          sub.forEach(function (c) { if (gs.indexOf(c.grp) === -1) gs.push(c.grp); });
+          h += '<div class="cc-row" data-gocat="' + esc(k) + '">' +
+            '<div class="cc-row-main"><div class="cc-row-name">' + esc(k) + '</div>' +
+            '<div class="cc-row-sub">' + gs.length + ' 個分組，' + sub.length + ' 張</div></div>' +
             '<div class="cc-row-side">›</div></div>';
         });
-        g += '<div class="cc-pad"><div class="cc-btns">' +
-          '<span class="cc-pick"><button class="cc-btn ghost">匯入 JSON</button>' +
-          '<input type="file" id="cc-imp" accept="application/json,.json"></span>' +
-          '<button class="cc-btn ghost" id="cc-exp">匯出 JSON</button>' +
-          '</div><div class="cc-row-sub" style="margin-top:10px">' +
-          '匯出的檔案包含角色、字卡與對話，可用來備份或換裝置。</div></div>';
-        body.innerHTML = g;
-        body.querySelectorAll('[data-grp]').forEach(function (el) {
-          el.onclick = function () { go('cards', el.dataset.grp); };
+
+      } else if (!activeGrp) {
+        // ---- 某個大分類：列出小分類，可整組開關 ----
+        var gs2 = [];
+        scope.forEach(function (c) { if (gs2.indexOf(c.grp) === -1) gs2.push(c.grp); });
+        if (!gs2.length) h += '<div class="cc-empty">這個分類還沒有字卡。</div>';
+        gs2.forEach(function (g) {
+          var sub = scope.filter(function (c) { return c.grp === g; });
+          var off = cfg.offGroups.indexOf(activeCat + '/' + g) !== -1;
+          h += '<div class="cc-row"><div class="cc-row-main" data-gogrp="' + esc(g) + '">' +
+            '<div class="cc-row-name">' + esc(g) + '</div>' +
+            '<div class="cc-row-sub">' + sub.length + ' 張' + (off ? '　已整組關閉' : '') + '</div></div>' +
+            '<input type="checkbox" class="cc-chk" data-grptg="' + esc(g) + '"' + (off ? '' : ' checked') + '>' +
+            '<div class="cc-row-side" data-gogrp="' + esc(g) + '">›</div></div>';
         });
-        $('#cc-exp').onclick = doExport;
-        $('#cc-imp').onchange = doImport;
-        return;
+
+      } else {
+        // ---- 某個小分類：列出字卡，可單張開關／刪除 ----
+        var rows = scope.filter(function (c) { return c.grp === activeGrp; });
+        var offNow = cfg.offGroups.indexOf(activeCat + '/' + activeGrp) !== -1;
+        h += '<div class="cc-sw"><div style="flex:1"><div class="cc-sw-label">整組加入抽卡池</div>' +
+          '<div class="cc-sw-sub">關掉之後這組全部不會被抽到</div></div>' +
+          '<input type="checkbox" class="cc-chk" id="cc-grp-on"' + (offNow ? '' : ' checked') + '></div>' +
+          '<div class="cc-pad">';
+        if (!rows.length) h += '<div class="cc-empty">這組還沒有字卡。</div>';
+        rows.forEach(function (c) { h += cardRow(c); });
+        h += '<div class="cc-btns"><button class="cc-btn danger" id="cc-delgrp">刪除整組</button></div></div>';
       }
-      title.textContent = activeGroup;
-      act.textContent = '＋卡';
-      act.onclick = addCard;
-      var rows = await db.cards.where('grp').equals(activeGroup).toArray();
-      var offNow = cfg.offGroups.indexOf(activeGroup) !== -1;
-      var c2 = '<div class="cc-sw"><div><div class="cc-sw-label">加入抽卡池</div>' +
-        '<div class="cc-sw-sub">關閉後這組不會被角色抽到</div></div>' +
-        '<input type="checkbox" id="cc-grp-on"' + (offNow ? '' : ' checked') + '></div>' +
-        '<div class="cc-pad">';
-      rows.forEach(function (r) {
-        c2 += '<div class="cc-card"><span>' + esc(r.text) + '</span>' +
-          '<span class="cc-del" data-del="' + r.id + '">×</span></div>';
+
+      // ---- 底部：匯入匯出 ----
+      h += '<div class="cc-pad" style="border-top:1px solid var(--border-color,#e0e0e0);margin-top:8px">' +
+        '<div class="cc-btns">' +
+        '<span class="cc-pick"><button class="cc-btn ghost">匯入 JSON</button>' +
+        '<input type="file" id="cc-imp" accept="application/json,.json"></span>' +
+        '<button class="cc-btn ghost" id="cc-exp">匯出 JSON</button></div>' +
+        '<div class="cc-row-sub" style="margin-top:10px">' +
+        '匯出的檔案包含角色、字卡與對話，可用來備份或換裝置。</div></div>';
+
+      body.innerHTML = h;
+
+      // ---- 綁定 ----
+      body.querySelectorAll('[data-cat]').forEach(function (el) {
+        el.onclick = function () { activeCat = el.dataset.cat; activeGrp = ''; render(); };
       });
-      if (!rows.length) c2 += '<div class="cc-empty">這組還沒有字卡。</div>';
-      c2 += '<div class="cc-btns"><button class="cc-btn danger" id="cc-delgrp">刪除整組</button></div></div>';
-      body.innerHTML = c2;
-      $('#cc-grp-on').onchange = async function (e) {
-        var i = cfg.offGroups.indexOf(activeGroup);
-        if (e.target.checked) { if (i !== -1) cfg.offGroups.splice(i, 1); }
-        else if (i === -1) cfg.offGroups.push(activeGroup);
-        await saveCfg(); await rebuildPool();
-        toast(e.target.checked ? '已加入抽卡池' : '已移出抽卡池');
+      body.querySelectorAll('[data-grp]').forEach(function (el) {
+        el.onclick = function () { activeGrp = el.dataset.grp; render(); };
+      });
+      body.querySelectorAll('[data-gocat]').forEach(function (el) {
+        el.onclick = function () { activeCat = el.dataset.gocat; activeGrp = ''; render(); };
+      });
+      body.querySelectorAll('[data-gogrp]').forEach(function (el) {
+        el.onclick = function () { activeGrp = el.dataset.gogrp; render(); };
+      });
+      body.querySelectorAll('[data-tg]').forEach(function (el) {
+        el.onchange = async function () {
+          await db.cards.update(Number(el.dataset.tg), { off: el.checked ? 0 : 1 });
+          await rebuildPool(); render();
+        };
+      });
+      body.querySelectorAll('[data-grptg]').forEach(function (el) {
+        el.onchange = async function () { await toggleGroup(activeCat, el.dataset.grptg, el.checked); };
+      });
+      var gOn = $('#cc-grp-on');
+      if (gOn) gOn.onchange = async function () { await toggleGroup(activeCat, activeGrp, gOn.checked); };
+      var delg = $('#cc-delgrp');
+      if (delg) delg.onclick = async function () {
+        var n = scope.filter(function (c) { return c.grp === activeGrp; }).length;
+        if (!confirm('刪除「' + activeGrp + '」整組共 ' + n + ' 張字卡？')) return;
+        await db.cards.where('cat').equals(activeCat)
+          .and(function (c) { return c.grp === activeGrp; }).delete();
+        await rebuildPool(); activeGrp = ''; render(); toast('已刪除');
       };
       body.querySelectorAll('[data-del]').forEach(function (el) {
         el.onclick = async function () {
@@ -525,15 +904,19 @@
           await rebuildPool(); render();
         };
       });
-      $('#cc-delgrp').onclick = async function () {
-        if (!confirm('刪除「' + activeGroup + '」整組共 ' + rows.length + ' 張字卡？')) return;
-        await db.cards.where('grp').equals(activeGroup).delete();
-        await rebuildPool();
-        activeGroup = null; render();
-        toast('已刪除');
-      };
+      var qi = $('#cc-q');
+      if (qi) {
+        qi.oninput = function () {
+          clearTimeout(qi._t);
+          qi._t = setTimeout(function () { q = qi.value.trim(); render(); }, 250);
+        };
+        if (q) { qi.focus(); qi.setSelectionRange(q.length, q.length); }
+      }
+      $('#cc-exp').onclick = doExport;
+      $('#cc-imp').onchange = doImport;
       return;
     }
+
 
     if (view === 'settings') {
       title.textContent = '回覆設定';
@@ -601,21 +984,39 @@
     }
   }
 
-  async function addGroup() {
-    var n = prompt('新分組名稱');
-    if (!n || !n.trim()) return;
-    var t = prompt('先放一張字卡進去');
-    if (!t || !t.trim()) return;
-    await db.cards.add({ grp: n.trim(), text: t.trim() });
-    await rebuildPool(); render();
+  // 整組開關：鍵是「大分類/小分類」，所以不同分類下的同名分組互不影響
+  async function toggleGroup(cat, grp, on) {
+    var key = cat + '/' + grp;
+    var i = cfg.offGroups.indexOf(key);
+    if (on) { if (i !== -1) cfg.offGroups.splice(i, 1); }
+    else if (i === -1) cfg.offGroups.push(key);
+    await saveCfg();
+    await rebuildPool();
+    render();
+    toast(on ? '已加入抽卡池' : '已移出抽卡池');
   }
 
   async function addCard() {
+    var cat = activeCat, grp = activeGrp;
+    if (!cat) {
+      cat = prompt('要加到哪個大分類？（沒有的話會新建）', '主字卡');
+      if (!cat || !cat.trim()) return;
+      cat = cat.trim();
+    }
+    if (!grp) {
+      grp = prompt('要加到哪個小分類？（沒有的話會新建）', '');
+      if (!grp || !grp.trim()) return;
+      grp = grp.trim();
+    }
     var t = prompt('新字卡內容（多張請用換行分隔）');
     if (!t || !t.trim()) return;
-    var lines = t.split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
-    await db.cards.bulkAdd(lines.map(function (s) { return { grp: activeGroup, text: s }; }));
-    await rebuildPool(); render();
+    var lines = t.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
+    await db.cards.bulkAdd(lines.map(function (x) {
+      return { cat: cat, grp: grp, text: x, off: 0 };
+    }));
+    await rebuildPool();
+    activeCat = cat; activeGrp = grp; q = '';
+    render();
     toast('加了 ' + lines.length + ' 張');
   }
 
@@ -701,7 +1102,9 @@
         }
         if (Array.isArray(data.chars)) await db.chars.bulkPut(data.chars);
         if (Array.isArray(data.cards)) {
-          var rows = data.cards.map(function (c) { return { grp: c.grp, text: c.text }; });
+          var rows = data.cards.map(function (c) {
+            return { cat: c.cat || '主字卡', grp: c.grp, text: c.text, off: c.off || 0 };
+          });
           await db.cards.bulkAdd(rows);
         }
         if (Array.isArray(data.msgs)) {
@@ -737,6 +1140,7 @@
       injectStyle();
       if (!injectScreen()) { console.warn('[cardchat] 找不到 #home-screen，畫面沒有掛上'); return; }
       injectIcon();
+      keepIcon();
       bind();
       await openDB();
       await loadCfg();

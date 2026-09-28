@@ -1,0 +1,577 @@
+/* EPhone 文青層：覆蓋原兔K機視覺，不改原 App 邏輯 */
+:root{
+  --ep-bg:#eee9df;--ep-paper:#f8f5ee;--ep-paper2:#f2eee5;--ep-ink:#403b35;--ep-muted:#827a70;
+  --ep-line:#d2c8b9;--ep-accent:#75644f;--ep-accent2:#9b8970;--ep-green:#687764;--ep-red:#8a655e;
+  --ep-shadow:0 10px 30px rgba(62,54,45,.10);--ep-serif:"Noto Serif TC","Noto Serif","Source Han Serif TC",serif;
+}
+html,body{background:var(--ep-bg)!important;color:var(--ep-ink)!important}
+body{font-family:"Noto Sans TC",system-ui,-apple-system,"Microsoft JhengHei",sans-serif!important}
+button,input,textarea,select{font-family:inherit}
+.screen{background-color:var(--ep-bg)!important}
+#home-screen{background-color:var(--ep-bg)!important}
+.header,.modal-header,.character-phone-header{background:rgba(248,245,238,.94)!important;border-color:var(--ep-line)!important;color:var(--ep-ink)!important;backdrop-filter:blur(14px)}
+.card,.modal-content,.form-container,.list-item,.world-book-group-container,.settings-section{background:rgba(248,245,238,.94)!important;border-color:var(--ep-line)!important;box-shadow:var(--ep-shadow)!important;color:var(--ep-ink)!important}
+.btn,.action-btn,.form-button{border-color:var(--ep-line)!important;color:var(--ep-ink)!important;background:var(--ep-paper2)!important;border-radius:10px!important;box-shadow:none!important}
+.btn:hover,.action-btn:hover{background:#e9e2d6!important}
+.btn-primary,.primary,.save-btn{background:var(--ep-accent)!important;color:#fbf8f1!important;border-color:var(--ep-accent)!important}
+input,textarea,select{background:#fbf9f4!important;color:var(--ep-ink)!important;border:1px solid var(--ep-line)!important;border-radius:9px!important}
+h1,h2,h3,.item-title,.section-title,.header-title{font-family:var(--ep-serif)!important;font-weight:500!important;letter-spacing:.045em}
+#ephone-literary-tools{font-family:var(--ep-serif)}
+.ep-modal{position:fixed;inset:0;z-index:10001;background:rgba(55,48,40,.22);backdrop-filter:blur(5px);display:none;align-items:flex-end;justify-content:center}
+.ep-modal.open{display:flex}
+.ep-sheet{width:min(100%,460px);max-height:88vh;overflow:auto;background:var(--ep-paper);border:1px solid var(--ep-line);border-bottom:0;border-radius:24px 24px 0 0;box-shadow:0 -20px 60px rgba(40,34,28,.18);padding:18px 16px 28px}
+.ep-sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.ep-title{font-size:21px}.ep-sub{font-size:11px;color:var(--ep-muted);line-height:1.7}
+.ep-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin:13px 0}.ep-action{min-height:82px;text-align:left;padding:12px;border:1px solid var(--ep-line);background:var(--ep-paper2);border-radius:14px}.ep-action strong{display:block;font:500 15px var(--ep-serif);margin-bottom:4px}.ep-action span{font-size:10px;color:var(--ep-muted);line-height:1.5}
+.ep-section{margin-top:16px;padding-top:14px;border-top:1px solid var(--ep-line)}.ep-section h3{font-size:16px;margin:0 0 9px}.ep-list{display:flex;flex-direction:column;gap:7px}.ep-row{display:flex;gap:8px;align-items:center;padding:9px 10px;border:1px solid var(--ep-line);border-radius:11px;background:#fbf9f4}.ep-row-main{flex:1;min-width:0}.ep-row-title{font:500 14px var(--ep-serif);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ep-meta{font-size:10px;color:var(--ep-muted);margin-top:3px;line-height:1.5}.ep-chip{display:inline-block;padding:2px 7px;border:1px solid var(--ep-line);border-radius:99px;margin-right:4px}.ep-empty{text-align:center;color:var(--ep-muted);font-size:12px;padding:22px 8px}
+.ep-calendar-head{display:flex;align-items:center;justify-content:space-between;margin:8px 0 10px}.ep-month{font:500 18px var(--ep-serif)}.ep-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.ep-week{font-size:9px;color:var(--ep-muted);text-align:center;padding:4px}.ep-day{min-height:62px;border:1px solid var(--ep-line);background:#fbf9f4;border-radius:8px;padding:5px;text-align:left}.ep-day.muted{opacity:.35}.ep-day.today{outline:1px solid var(--ep-accent)}.ep-day-num{font-size:10px;font-weight:600}.ep-event{font-size:8px;line-height:1.25;margin-top:3px;padding:2px 3px;border-radius:4px;background:#ebe4d8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ep-event.char{border-left:2px solid var(--ep-accent)}
+.ep-sync-card{text-align:center;padding:20px 14px;border:1px solid var(--ep-line);background:#fbf9f4;border-radius:16px}.ep-sync-mark{font-size:26px;color:var(--ep-accent)}.ep-sync-text{font:500 20px/1.7 var(--ep-serif);margin:12px 0}.ep-sync-kind{font-size:10px;color:var(--ep-muted);letter-spacing:.12em}.ep-toolbar{display:flex;gap:7px;overflow:auto;padding-bottom:3px}.ep-toolbar button{white-space:nowrap}.ep-select{width:100%;margin:7px 0 10px}
+.ep-note{padding:10px 11px;border-left:2px solid var(--ep-accent);background:#f0eadf;color:#675e54;font-size:11px;line-height:1.7;margin:10px 0}.ep-danger{color:var(--ep-red)}
+body.dark #ephone-literary-tools .ep-sheet{background:#2d2924;color:#e7dfd3}body.dark #ephone-literary-tools .ep-action,body.dark #ephone-literary-tools .ep-row,body.dark #ephone-literary-tools .ep-day,body.dark #ephone-literary-tools .ep-sync-card{background:#332e28;color:#e7dfd3}body.dark #ephone-literary-tools .ep-note{background:#393229;color:#c9bfb2}
+@media(max-width:360px){.ep-grid{grid-template-columns:1fr}.ep-day{min-height:54px}}
+
+/* ===== EPhone 第三頁：共用行事曆 + 同頻 ===== */
+.ephone-third-page{
+  padding:0 18px!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(circle at 18% 20%,rgba(255,255,255,.72),transparent 34%),
+    linear-gradient(180deg,#eee9df 0%,#e5ded1 100%)!important;
+}
+.ephone-third-page-inner{
+  width:100%;height:100%;box-sizing:border-box;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  padding:28px 8px 118px;
+}
+.ephone-third-heading{text-align:center;max-width:340px;margin-bottom:28px}
+.ephone-third-kicker{
+  font-size:10px;letter-spacing:.22em;color:var(--ep-accent);
+  margin-bottom:9px;text-transform:uppercase
+}
+.ephone-third-title{
+  font:500 25px/1.35 var(--ep-serif);letter-spacing:.08em;color:var(--ep-ink)
+}
+.ephone-third-note{
+  margin-top:10px;font-size:11px;line-height:1.8;color:var(--ep-muted)
+}
+.ephone-third-apps{
+  width:100%;max-width:390px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px
+}
+.ephone-third-app{
+  min-width:0;min-height:176px;padding:20px 12px 17px!important;
+  border:1px solid var(--ep-line)!important;border-radius:22px!important;
+  background:rgba(248,245,238,.9)!important;color:var(--ep-ink)!important;
+  box-shadow:0 12px 28px rgba(62,54,45,.09)!important;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;cursor:pointer;transition:transform .18s ease,background .18s ease,box-shadow .18s ease
+}
+.ephone-third-app:active{transform:scale(.965);box-shadow:0 5px 14px rgba(62,54,45,.08)!important}
+.ephone-third-icon{
+  width:72px;height:72px;border-radius:20px;display:flex;align-items:center;justify-content:center;
+  margin-bottom:15px;border:1px solid #cfc3b2;background:#f1ece3;color:var(--ep-accent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 6px 16px rgba(62,54,45,.08)
+}
+.calendar-glyph{font:500 34px/1 var(--ep-serif)}
+.sync-glyph{font:400 48px/1 Georgia,serif;transform:translateY(-2px)}
+.ephone-third-app-name{font:500 16px var(--ep-serif);letter-spacing:.08em}
+.ephone-third-app-desc{margin-top:7px;font-size:10px;line-height:1.55;color:var(--ep-muted)}
+.ephone-third-footer{margin-top:27px;font:400 10px var(--ep-serif);letter-spacing:.08em;color:#918779}
+.pagination-dots{z-index:20!important}
+.pagination-dots .dot{background:rgba(117,100,79,.28)!important}
+.pagination-dots .dot.active{background:var(--ep-accent)!important}
+@media(max-width:380px){
+  .ephone-third-page-inner{padding-left:2px;padding-right:2px}
+  .ephone-third-apps{gap:10px}
+  .ephone-third-app{min-height:164px;padding-left:8px!important;padding-right:8px!important}
+  .ephone-third-icon{width:64px;height:64px}
+  .ephone-third-title{font-size:22px}
+}
+
+
+/* ===== EPhone v4: paper-dialog / readable home labels ===== */
+.ep-page-head{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:4px 0 12px}.ep-page-head .ep-month{margin:auto}.ep-page-head button:disabled{opacity:.35;pointer-events:none}
+.ep-section-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.ep-section-head h3{margin:0}.ep-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.ep-form-grid label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--ep-muted)}.ep-form-grid label.full{grid-column:1/-1}.ep-form-grid input,.ep-form-grid textarea,.ep-form-grid select{width:100%;box-sizing:border-box}.ep-check-row{font-size:11px;margin:10px 0;color:var(--ep-ink)}
+.ep-danger-btn{color:var(--ep-red)!important}.ep-field-label{display:block;font-size:11px;color:var(--ep-muted);margin:4px 0 6px}.ep-dialog-input,.ep-dialog-textarea{width:100%;box-sizing:border-box!important;padding:10px 11px!important;background:#fbf9f4!important;border:1px solid var(--ep-line)!important;border-radius:11px!important;color:var(--ep-ink)!important;font-family:inherit!important;font-size:14px!important;outline:none!important}.ep-dialog-textarea{resize:vertical;line-height:1.6}.ep-dialog-modal{position:fixed;inset:0;z-index:10003;background:rgba(48,42,35,.30);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px}.ep-dialog-modal.open{display:flex}.ep-dialog-card{width:min(100%,430px);background:var(--ep-paper);border:1px solid var(--ep-line);border-radius:22px;box-shadow:0 18px 60px rgba(44,37,30,.22);padding:20px}.ep-dialog-title{font:500 21px var(--ep-serif);color:var(--ep-ink);letter-spacing:.05em;margin-bottom:13px}.ep-dialog-body{max-height:66vh;overflow:auto}.ep-dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--ep-line)}.ep-dialog-actions button{min-width:76px}.ep-dialog-actions button.primary{background:var(--ep-accent)!important;color:#fbf8f1!important;border-color:var(--ep-accent)!important}.ep-toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,16px);opacity:0;pointer-events:none;z-index:10004;background:rgba(64,59,53,.94);color:#f8f5ee;padding:10px 14px;border-radius:13px;box-shadow:0 12px 30px rgba(30,25,20,.18);transition:.22s ease;min-width:180px;text-align:center}.ep-toast.show{opacity:1;transform:translate(-50%,0)}.ep-toast-title{font:500 13px var(--ep-serif)}.ep-toast-text{font-size:10px;opacity:.82;margin-top:2px}.past-day{opacity:.32!important;background:#eee9df!important;cursor:not-allowed!important}.ep-editor{background:#f4efe6;border:1px solid var(--ep-line);border-radius:15px;padding:13px!important}.ep-editor h3{margin-top:0}
+#ephone-literary-tools .ep-modal button,#ephone-literary-tools .ep-dialog-modal button{touch-action:manipulation}
+#home-screen .desktop-app-icon{width:72px!important;min-width:72px!important}.desktop-app-icon .label{display:block!important;max-width:88px!important;margin:8px auto 0!important;line-height:1.25!important;white-space:normal!important;text-align:center!important;overflow-wrap:anywhere!important;font-size:12px!important;color:var(--ep-ink,#403b35)!important;text-shadow:0 1px 0 rgba(255,255,255,.55)!important}.desktop-app-icon .icon-bg-desktop{margin-bottom:0!important}.desktop-app-icon img{max-width:72px!important;max-height:72px!important;object-fit:cover}.home-page .desktop-app-icon{overflow:visible!important}
+#desktop-dock .desktop-app-icon .label{font-size:11px!important;line-height:1.2!important;max-width:76px!important;margin-top:6px!important}.ep-close{font-size:25px!important;line-height:1!important;width:40px;height:40px;border-radius:50%!important}
+@media(max-width:380px){.ep-form-grid{grid-template-columns:1fr}.ep-form-grid label.full{grid-column:auto}.ep-sheet{padding:16px 12px 24px}.ep-day{min-height:58px}.desktop-app-icon .label{font-size:11px!important}}
+
+/* v5 SillyTavern-style World Info editor */
+.ephone-st-editor{margin:18px 0 30px;padding:18px 14px 28px;background:rgba(248,245,238,.96);border:1px solid #d8cdbd;border-radius:20px;box-shadow:0 10px 28px rgba(65,54,42,.07);color:#403b35;font-family:var(--ep-sans,system-ui,sans-serif)}
+.st-editor-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;border-bottom:1px solid #d8cdbd;padding-bottom:12px;margin-bottom:10px}.st-editor-kicker{font-size:9px;letter-spacing:.18em;color:#877766}.st-editor-heading h3{margin:3px 0 0;font:500 20px/1.3 var(--ep-serif)}.st-editor-uid{font:11px/1.8 system-ui;color:#877766;background:#eee7dc;border:1px solid #d8cdbd;border-radius:999px;padding:2px 8px}
+.st-editor-section{padding:13px 0;border-bottom:1px solid #e1d8ca}.st-editor-section:last-child{border-bottom:0}.st-editor-section h4{margin:0 0 10px;font:500 15px var(--ep-serif);letter-spacing:.04em}.st-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.st-grid label{display:flex;flex-direction:column;gap:5px;font-size:10px;color:#756a5d}.st-grid label.full{grid-column:1/-1}.st-grid input,.st-grid textarea,.st-grid select{box-sizing:border-box;width:100%;padding:9px 10px;border:1px solid #d8cdbd;border-radius:10px;background:#fbf9f4;color:#403b35;font:13px/1.45 system-ui,sans-serif;outline:none}.st-grid textarea{resize:vertical;min-height:42px}.st-inline-check{flex-direction:row!important;align-items:center;gap:7px!important;justify-content:flex-start;padding:8px 9px;border:1px solid #e1d8ca;border-radius:10px;background:#f5f0e8}.st-inline-check input{width:auto!important}.st-position-hint{margin-top:8px;font-size:10px;line-height:1.65;color:#877766;background:#f1ece3;border-left:2px solid #7d6954;padding:8px 10px;border-radius:0 8px 8px 0}.ephone-st-editor.at-depth #st-depth,.ephone-st-editor.at-depth #st-role{border-color:#9a8165}
+#desktop-dock{display:flex!important;align-items:flex-start!important;justify-content:space-evenly!important;gap:4px!important;padding:12px 10px 16px!important;overflow:visible!important}.desktop-app-icon{flex:1 1 0!important;gap:0!important;min-width:0!important;width:auto!important;max-width:92px!important;overflow:visible!important;text-align:center!important}.desktop-app-icon .icon-bg-desktop{margin:0 auto 0!important}.desktop-app-icon .label{display:block!important;width:100%!important;max-width:none!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere!important;word-break:break-word!important;line-height:1.3!important;font-size:12px!important;min-height:31px!important;text-align:center!important;margin-top:1px!important;color:var(--ep-ink,#403b35)!important;text-shadow:0 1px 0 rgba(255,255,255,.6)!important}.desktop-app-icon img{max-width:72px!important;max-height:72px!important}
+@media(max-width:390px){.st-grid{grid-template-columns:1fr}.st-grid label.full{grid-column:auto}.ephone-st-editor{margin-left:0;margin-right:0;padding:15px 11px 24px}.desktop-app-icon .label{font-size:11px!important;min-height:29px!important}.desktop-app-icon .icon-bg-desktop{margin-bottom:0!important}}
+
+/* Dock 微調：整排往上移一點，避免底部 App 名稱被截掉 */
+#desktop-dock{
+  position:relative!important;
+  top:-7px!important;
+}
+
+/* ===== EPhone v7 使用者可自訂主題 ===== */
+.ep-user-theme-card{border:1px solid var(--ep-line)!important;border-radius:18px!important;background:rgba(248,245,238,.94)!important}
+.ep-theme-note{font-size:11px;line-height:1.7;color:var(--ep-muted);padding:9px 10px;margin:4px 0 14px;border-left:2px solid var(--ep-accent);background:rgba(255,255,255,.28);border-radius:0 9px 9px 0}
+.ep-theme-subtitle{font:500 14px var(--ep-serif);color:var(--ep-ink);margin:15px 0 9px;letter-spacing:.04em}
+.ep-theme-color-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.ep-theme-color-grid label{display:flex;flex-direction:column;gap:5px;align-items:center;font-size:10px;color:var(--ep-muted);padding:8px 4px;border:1px solid var(--ep-line);border-radius:11px;background:rgba(255,255,255,.2)}
+.ep-theme-color-grid input{width:38px;height:32px;padding:0;border:0!important;background:transparent!important;border-radius:8px!important;cursor:pointer}
+.ep-theme-wallpaper-actions{display:flex;gap:7px;flex-wrap:wrap}.ep-theme-preview{height:82px;margin-top:9px;border:1px solid var(--ep-line);border-radius:12px;background:var(--ep-bg);background-position:center;background-size:cover;display:flex;align-items:center;justify-content:center;color:var(--ep-muted);font-size:10px;overflow:hidden}
+.ep-theme-range-row{margin-top:10px}.ep-theme-range-row label{display:flex;justify-content:space-between;font-size:10px;color:var(--ep-muted);margin-bottom:5px}.ep-theme-range-row input[type=range]{width:100%;accent-color:var(--ep-accent)}
+.ep-theme-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.ep-theme-select-grid label{display:flex;flex-direction:column;gap:5px;font-size:10px;color:var(--ep-muted)}.ep-theme-select-grid select{width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--ep-line);border-radius:9px;background:var(--ep-paper);color:var(--ep-ink)}
+.ep-theme-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}.ep-theme-actions button{flex:1;min-width:130px}
+@media(max-width:390px){.ep-theme-color-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ep-theme-select-grid{grid-template-columns:1fr}.ep-theme-actions button{min-width:0}}
+
+/* ===== EPhone v9：Dock 改回與主畫面 App 相同的簡潔圖示 ===== */
+/* 不再使用大型白色玻璃底板，讓底部 App 跟壁紙自然融在一起。 */
+#desktop-dock{
+  position:relative!important;
+  top:-7px!important;
+  width:auto!important;
+  max-width:100%!important;
+  padding:0!important;
+  margin:0 auto!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+  gap:18px!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  overflow:visible!important;
+}
+#desktop-dock .desktop-app-icon{
+  flex:0 0 72px!important;
+  width:72px!important;
+  min-width:72px!important;
+  max-width:72px!important;
+  gap:8px!important;
+  align-items:center!important;
+  overflow:visible!important;
+  text-align:center!important;
+}
+#desktop-dock .desktop-app-icon .icon-bg-desktop{
+  width:55px!important;
+  height:55px!important;
+  min-width:55px!important;
+  min-height:55px!important;
+  margin:0 auto!important;
+  border-radius:14px!important;
+  background-color:rgba(240,242,245,.86)!important;
+  box-shadow:0 2px 7px rgba(0,0,0,.08)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+#desktop-dock .desktop-app-icon img{
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:cover!important;
+}
+#desktop-dock .desktop-app-icon .label{
+  display:block!important;
+  width:auto!important;
+  max-width:110px!important;
+  min-height:0!important;
+  margin:0 auto!important;
+  padding:0!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  overflow-wrap:normal!important;
+  word-break:keep-all!important;
+  line-height:1.2!important;
+  font-size:13px!important;
+  font-weight:500!important;
+  color:var(--ep-ink,#403b35)!important;
+  text-shadow:none!important;
+}
+#desktop-dock .desktop-app-icon:active .icon-bg-desktop{
+  transform:scale(.94)!important;
+}
+@media(max-width:390px){
+  #desktop-dock{gap:10px!important}
+  #desktop-dock .desktop-app-icon{flex-basis:68px!important;width:68px!important;min-width:68px!important;max-width:68px!important;gap:8px!important}
+  #desktop-dock .desktop-app-icon .label{font-size:12px!important}
+}
+
+/* ===== EPhone v10：Dock 完全沿用主畫面 App 圖示，不另加美化 ===== */
+#desktop-dock,
+#phone-screen.dark-mode #desktop-dock {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  position: relative !important;
+  top: -7px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  gap: 30px !important;
+  overflow: visible !important;
+}
+
+/* Dock 裡的 App 直接使用原版 .desktop-app-icon 的視覺規格 */
+#desktop-dock .desktop-app-icon {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 55px !important;
+  max-width: none !important;
+  text-align: center !important;
+  overflow: visible !important;
+}
+
+#desktop-dock .desktop-app-icon .icon-bg-desktop {
+  width: 55px !important;
+  height: 55px !important;
+  min-width: 55px !important;
+  min-height: 55px !important;
+  margin: 0 !important;
+  border-radius: 14px !important;
+  background-color: #f0f2f5 !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,.1) !important;
+  overflow: hidden !important;
+}
+
+#desktop-dock .desktop-app-icon img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  border-radius: 0 !important;
+}
+
+#desktop-dock .desktop-app-icon .label {
+  color: var(--home-icon-widget-text-color, #333) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: normal !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  text-shadow: 0 1px 4px rgba(0,0,0,.6) !important;
+}
+
+@media (max-width: 390px) {
+  #desktop-dock { gap: 18px !important; }
+  #desktop-dock .desktop-app-icon .label { font-size: 12px !important; }
+}
+
+
+/* ===== EPhone v11：保留原版聊天工具列圖示 ===== */
+/* 不讓全域美化的 button background shorthand 蓋掉原版的 SVG / data-URI 圖示。 */
+#chat-input-actions-top .chat-action-icon-btn,
+#chat-input-actions-top button,
+#input-actions-wrapper #wait-reply-btn,
+#input-actions-wrapper #send-btn {
+  box-shadow: none;
+}
+#chat-input-actions-top .chat-action-icon-btn svg {
+  display: block;
+  flex: 0 0 auto;
+}
+#chat-input-actions-top .chat-action-icon-btn {
+  color: var(--text-primary, #333);
+}
+
+/* ===== EPhone v12：Dock 圖示透明化 =====
+   Dock 只保留 App 圖片與名稱，不再替每個圖示套一層獨立方形背景。
+   主畫面的原生 .desktop-app-icon 不受影響。 */
+#desktop-dock .desktop-app-icon .icon-bg-desktop {
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  min-height: 52px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+#desktop-dock .desktop-app-icon img {
+  width: 52px !important;
+  height: 52px !important;
+  max-width: 52px !important;
+  max-height: 52px !important;
+  object-fit: contain !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  mix-blend-mode: multiply;
+}
+
+#desktop-dock .desktop-app-icon .label {
+  margin-top: 2px !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,.35) !important;
+}
+
+/* 自訂主題也不能重新把 Dock 的透明圖示包裝成卡片 */
+#desktop-dock .icon-bg-desktop {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+/* ===== EPhone v13：共用行事曆／同頻改為獨立 App 圖示 =====
+   這一頁不再使用大型卡片與固定米色背景，讓使用者自訂的壁紙可以直接透出來。 */
+.ephone-third-page{
+  background: transparent !important;
+}
+.ephone-third-page-inner{
+  padding: 0 12px 88px !important;
+  justify-content: center !important;
+}
+.ephone-third-heading,
+.ephone-third-footer{
+  display:none !important;
+}
+.ephone-third-apps{
+  width:auto !important;
+  max-width:none !important;
+  display:flex !important;
+  align-items:flex-start !important;
+  justify-content:center !important;
+  gap:42px !important;
+}
+.ephone-third-app{
+  width:92px !important;
+  min-width:92px !important;
+  min-height:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  color:var(--ep-ink,#403b35) !important;
+  box-shadow:none !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  text-align:center !important;
+  cursor:pointer !important;
+}
+.ephone-third-app:active{
+  transform:scale(.96) !important;
+  box-shadow:none !important;
+}
+.ephone-third-icon{
+  width:62px !important;
+  height:62px !important;
+  margin:0 0 8px !important;
+  border:0 !important;
+  border-radius:16px !important;
+  background:transparent !important;
+  color:var(--ep-accent,#75644f) !important;
+  box-shadow:none !important;
+}
+.ephone-third-app-name{
+  font:500 14px/1.3 var(--ep-serif) !important;
+  letter-spacing:.04em !important;
+  color:var(--ep-ink,#403b35) !important;
+  text-shadow:0 1px 3px rgba(255,255,255,.55) !important;
+  white-space:nowrap !important;
+}
+.ephone-third-app-desc{display:none !important}
+@media(max-width:390px){
+  .ephone-third-apps{gap:30px !important}
+  .ephone-third-app{width:86px !important;min-width:86px !important}
+  .ephone-third-icon{width:58px !important;height:58px !important}
+  .ephone-third-app-name{font-size:13px !important}
+}
+
+
+/* ===== EPhone v14：共用行事曆／字卡完全比照一般 App 尺寸 ===== */
+.ephone-third-page{
+  background:transparent !important;
+}
+.ephone-third-page-inner{
+  padding:0 12px 88px !important;
+}
+.ephone-third-apps{
+  width:auto !important;
+  max-width:none !important;
+  display:flex !important;
+  align-items:flex-start !important;
+  justify-content:center !important;
+  gap:28px !important;
+}
+.ephone-third-app{
+  width:72px !important;
+  min-width:72px !important;
+  max-width:72px !important;
+  min-height:0 !important;
+  height:auto !important;
+  padding:0 !important;
+  margin:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  color:var(--ep-ink,#403b35) !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+}
+.ephone-third-icon{
+  width:55px !important;
+  height:55px !important;
+  min-width:55px !important;
+  min-height:55px !important;
+  margin:0 auto !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:14px !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  color:var(--ep-accent,#75644f) !important;
+}
+.ephone-third-app-name{
+  display:block !important;
+  width:100% !important;
+  margin:8px auto 0 !important;
+  padding:0 !important;
+  font:500 12px/1.25 var(--ep-serif) !important;
+  letter-spacing:.02em !important;
+  color:var(--ep-ink,#403b35) !important;
+  text-align:center !important;
+  white-space:normal !important;
+  overflow:visible !important;
+  text-shadow:0 1px 0 rgba(255,255,255,.55) !important;
+}
+.ephone-third-app-desc{display:none !important}
+@media(max-width:390px){
+  .ephone-third-apps{gap:24px !important}
+  .ephone-third-app{width:72px !important;min-width:72px !important;max-width:72px !important}
+  .ephone-third-icon{width:55px !important;height:55px !important;min-width:55px !important;min-height:55px !important}
+  .ephone-third-app-name{font-size:12px !important}
+}
+
+/* v15：首頁兩個 EPhone 核心 App 也可由使用者自訂名稱與 Icon */
+.ephone-third-icon.has-custom-image{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+}
+.ephone-third-icon.has-custom-image img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  border:0!important;
+  border-radius:14px!important;
+}
+.ep-third-app-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.ep-third-app-setting{border:1px solid var(--ep-line);background:rgba(251,249,244,.72);border-radius:12px;padding:10px}
+.ep-third-app-setting-title{font:500 13px var(--ep-serif);margin-bottom:8px;color:var(--ep-ink)}
+.ep-third-app-setting label{display:flex;flex-direction:column;gap:5px;font-size:10px;color:var(--ep-muted)}
+.ep-third-app-setting input[type=text]{width:100%;box-sizing:border-box}
+.ep-third-icon-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.ep-third-icon-actions .upload-btn-pill{font-size:10px!important;padding:7px 9px!important}
+/* 新增：第三頁 App（共用行事曆／字卡／雙人狀態）Icon 縮圖預覽，讓使用者能確認目前是否已設定自訂 Icon */
+.ep-third-icon-preview{width:34px;height:34px;flex:0 0 34px;border-radius:10px;border:1px solid var(--ep-line,#D2C8B9);background-color:var(--ep-paper2,#F2EEE5);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--ep-muted,#827A70);overflow:hidden}
+.ep-third-icon-preview.has-icon{color:transparent}
+@media(max-width:560px){.ep-third-app-settings{grid-template-columns:1fr}}
+
+/* v16：字卡隨機抽選按鈕與抽選提示 */
+.ep-primary-btn{font-weight:700}
+.ep-sync-hint{margin-top:10px;font-size:12px;opacity:.68;text-align:center}
+
+/* EPhone AI 共同觀影：僅作用於觀影模組，不碰原站全域按鈕/卡片 */
+#ephone-watch-modal{position:fixed;inset:0;z-index:100001;display:flex;align-items:center;justify-content:center;padding:12px}
+#ephone-watch-modal[hidden]{display:none!important}
+#ephone-watch-modal .ep-watch-backdrop{position:absolute;inset:0;background:rgba(15,12,12,.58);backdrop-filter:blur(6px)}
+#ephone-watch-modal .ep-watch-panel{position:relative;width:min(1080px,100%);height:min(92vh,900px);background:#f7f2ed;border:1px solid rgba(255,255,255,.7);border-radius:24px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.3);display:flex;flex-direction:column}
+#ephone-watch-modal .ep-watch-head{height:62px;flex:0 0 62px;display:flex;align-items:center;justify-content:space-between;padding:8px 14px 8px 20px;background:rgba(255,253,249,.97);border-bottom:1px solid #e5dbd2}
+#ephone-watch-modal .ep-watch-kicker{font:10px/1.2 ui-monospace,monospace;letter-spacing:.16em;color:#a86c72}
+#ephone-watch-modal .ep-watch-title{font:600 18px/1.25 "Noto Serif TC","Noto Serif SC",serif;color:#3e3835;margin-top:3px}
+#ephone-watch-modal .ep-watch-close{width:40px;height:40px;border:1px solid #e2d7ce;background:#fffdf9;color:#3e3835;border-radius:12px;font-size:24px;line-height:1}
+#ephone-watch-modal .ep-watch-body{padding:14px;overflow:auto;min-height:0}
+#ephone-watch-modal .ep-watch-url-row{display:flex;gap:8px;margin-bottom:12px}
+#ephone-watch-modal .ep-watch-url-row input{flex:1;min-width:0;height:44px;border:1px solid #d9cec5;border-radius:12px;background:#fffdf9;padding:0 13px;color:#3e3835}
+#ephone-watch-modal .ep-watch-url-row button,#ephone-watch-modal .ep-watch-side button{border:1px solid #b98287;background:#fff8f7;color:#8e555b;border-radius:12px;padding:0 16px;font-weight:600}
+#ephone-watch-modal .ep-watch-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(250px,.75fr);gap:12px}
+#ephone-watch-modal .ep-watch-video{background:#171515;border-radius:16px;overflow:hidden;min-height:300px}
+#ephone-watch-modal #ephone-watch-player{width:100%;aspect-ratio:16/9;background:#111}
+#ephone-watch-modal .ep-watch-time{padding:9px 12px;color:#eee;font:12px ui-monospace,monospace;background:#201c1c}
+#ephone-watch-modal .ep-watch-side{background:#fffdf9;border:1px solid #e3d8cf;border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px}
+#ephone-watch-modal .ep-watch-side label{font-size:12px;color:#716764;display:flex;flex-direction:column;gap:6px}
+#ephone-watch-modal .ep-watch-side select,#ephone-watch-modal .ep-watch-side textarea{border:1px solid #ddd1c8;border-radius:10px;background:#fff;padding:9px;color:#3e3835}
+#ephone-watch-modal .ep-watch-side textarea{min-height:150px;resize:vertical;line-height:1.55}
+#ephone-watch-modal .ep-watch-side button{height:42px;cursor:pointer}
+#ephone-watch-modal .ep-watch-status{font-size:11px;line-height:1.5;color:#766c67;word-break:break-word}
+#ephone-watch-modal .ep-watch-status.error{color:#a33f47}
+#ephone-watch-modal .ep-watch-result{margin-top:12px;background:#fffdf9;border:1px solid #e3d8cf;border-radius:16px;padding:14px;min-height:110px;color:#3e3835}
+#ephone-watch-modal .ep-watch-meta{font:10px ui-monospace,monospace;color:#a06b71;margin-bottom:8px}
+#ephone-watch-modal .ep-watch-text{line-height:1.75;font-size:14px}
+#ephone-watch-modal .ep-watch-empty{color:#9a8f89;font-size:13px}
+body.ep-watch-open{overflow:hidden}
+@media(max-width:720px){#ephone-watch-modal{padding:0}#ephone-watch-modal .ep-watch-panel{height:100%;width:100%;border-radius:0}#ephone-watch-modal .ep-watch-grid{grid-template-columns:1fr}#ephone-watch-modal .ep-watch-video{min-height:0}#ephone-watch-modal .ep-watch-url-row{flex-direction:column}#ephone-watch-modal .ep-watch-url-row button{height:42px}}
+
+/* v33 AI共同觀影聊天框：只作用於共同觀影模組，不碰 EPhone 其他 UI */
+#ephone-watch-modal .ep-watch-subtitle{font-size:12px;opacity:.72;margin-top:4px}
+#ephone-watch-modal .ep-watch-check{display:flex;align-items:center;gap:7px;font-size:13px}
+#ephone-watch-modal .ep-watch-check input{width:auto;accent-color:currentColor}
+#ephone-watch-modal .ep-watch-chat{margin-top:14px;max-height:32vh;overflow-y:auto;padding:12px;border:1px solid rgba(120,90,80,.18);border-radius:14px;background:rgba(255,255,255,.34);display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
+#ephone-watch-modal .ep-watch-msg{max-width:88%;display:flex;flex-direction:column;gap:3px}
+#ephone-watch-modal .ep-watch-msg.user{align-self:flex-end;align-items:flex-end}
+#ephone-watch-modal .ep-watch-msg.assistant{align-self:flex-start;align-items:flex-start}
+#ephone-watch-modal .ep-watch-msg-name{font-size:11px;opacity:.62;padding:0 5px}
+#ephone-watch-modal .ep-watch-msg-bubble{padding:9px 12px;border-radius:13px;line-height:1.55;font-size:14px;background:rgba(255,255,255,.72);box-shadow:0 1px 3px rgba(0,0,0,.05);word-break:break-word}
+#ephone-watch-modal .ep-watch-msg.user .ep-watch-msg-bubble{background:rgba(120,85,75,.12)}
+#ephone-watch-modal .ep-watch-msg-meta{font-size:10px;opacity:.48;padding:0 5px}
+#ephone-watch-modal .ep-watch-compose{display:flex;gap:8px;margin-top:10px;align-items:flex-end}
+#ephone-watch-modal #ephone-watch-input{flex:1;min-height:42px;max-height:120px;resize:vertical;border-radius:12px;padding:10px 12px;box-sizing:border-box}
+#ephone-watch-modal #ephone-watch-send{flex:0 0 auto;min-height:42px}
+@media (max-width:700px){
+  #ephone-watch-modal .ep-watch-grid{grid-template-columns:1fr}
+  #ephone-watch-modal .ep-watch-chat{max-height:30vh}
+  #ephone-watch-modal .ep-watch-compose{position:sticky;bottom:0;padding-top:8px;background:inherit}
+}
+
+/* AI 生圖儲存按鈕：只作用於圖片訊息，不影響其他按鈕 */
+.ai-generated-image-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  max-width: 100%;
+}
+.ai-image-save-btn {
+  appearance: none;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(20,20,20,.72);
+  color: inherit;
+  border-radius: 10px;
+  padding: 6px 11px;
+  font-size: 12px;
+  line-height: 1.2;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+.ai-image-save-btn:active { transform: scale(.97); }
+.ai-image-save-btn:disabled { opacity: .65; cursor: default; }

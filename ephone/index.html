@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f2e8df">
+<title>EPhone Core</title>
+<link rel="stylesheet" href="./ephone-core.css">
+</head>
+<body>
+<div class="app-shell">
+<header class="topbar">
+  <div><div class="eyebrow">E-PHONE CORE</div><h1>EPhone</h1><p>獨立生活資料層，不依賴兔K機本體。</p></div>
+  <button class="icon-btn" id="settingsBtn" aria-label="設定">⚙</button>
+</header>
+
+<nav class="tabs" aria-label="EPhone Core">
+  <button class="tab active" data-tab="home">總覽</button>
+  <button class="tab" data-tab="people">人物</button>
+  <button class="tab" data-tab="memory">紀念日</button>
+  <button class="tab" data-tab="data">資料</button>
+</nav>
+
+<main>
+<section id="tab-home" class="tab-panel active">
+  <div class="hero" id="relationshipHero"></div>
+  <div class="grid two" id="weatherGrid"></div>
+  <div class="card" id="countdownCard"></div>
+  <div class="card"><div class="section-head"><h2>兩人的狀態</h2><button class="small-btn" id="refreshAll">重新同步</button></div><div id="statusList"></div></div>
+</section>
+
+<section id="tab-people" class="tab-panel">
+  <div class="section-head"><div><h2>人物</h2><p class="muted">可加入多個角色。生日會自動計算年齡，位置會用來計算距離、時差、異地／異國與天氣。</p></div><button class="primary" id="addPerson">＋ 新增人物</button></div>
+  <div id="peopleList" class="stack"></div>
+</section>
+
+<section id="tab-memory" class="tab-panel">
+  <div class="section-head"><div><h2>紀念日</h2><p class="muted">支援週年重複，會自動計算已經過了多久與下次倒數。</p></div><button class="primary" id="addMemorial">＋ 新增</button></div>
+  <div id="memorialList" class="stack"></div>
+</section>
+
+<section id="tab-data" class="tab-panel">
+  <div class="card"><h2>獨立資料</h2><p class="muted">所有資料只存在本機瀏覽器。匯出後可以備份或搬到另一台裝置。</p><div class="button-row"><button class="primary" id="exportData">匯出 JSON</button><label class="secondary file-btn">匯入 JSON<input id="importData" type="file" accept="application/json"></label></div></div>
+  <div class="card"><h2>與兔K機的關係</h2><p>這一層不依賴兔K機的聊天詳情頁、CSS 或角色設定頁。兔K機更新時，EPhone Core 的資料仍然留在自己的 localStorage。</p><div class="code-pill">EPhone Core → localStorage / EPhoneCore.v2</div><p class="muted">AI 聊天會讀取這裡的年齡、位置、天氣與多人關係摘要，但只使用已設定／已同步的資料。</p></div>
+  <div class="card"><h2>雙人／多人狀態 App</h2><label>App 名稱<input id="appName" value="雙人狀態" maxlength="24"></label><div class="button-row"><button type="button" class="secondary" id="appIconBtn">🖼️ 更換 App Icon</button><button type="button" class="secondary" id="appIconClear">恢復預設</button><input type="file" id="appIconInput" accept="image/*" hidden></div><p class="muted">這個 Icon 是 EPhone 第三頁入口的自訂圖示。</p></div><div class="card"><h2>目前資料</h2><pre id="dataPreview"></pre></div>
+</section>
+</main>
+
+<div class="modal" id="personModal" hidden><div class="modal-box"><div class="modal-head"><h2 id="personModalTitle">新增角色</h2><button class="icon-btn close" data-close="personModal">×</button></div><form id="personForm"><input type="hidden" id="personId"><label>名稱<input id="personName" required placeholder="例如：程放"></label><label>生日<input id="personBirthday" type="date"></label><label>位置／城市<input id="personLocation" placeholder="例如：東京、日本"></label><label>人物 Icon <div class="icon-upload-row"><button type="button" class="secondary" id="personIconBtn">🖼️ 上傳 Icon</button><button type="button" class="secondary" id="personIconClear">清除</button><input type="file" id="personIconInput" accept="image/*" hidden><input type="hidden" id="personIcon"><span id="personIconPreview" class="icon-preview"></span></div></label><label>角色類型<select id="personType"><option value="character">角色</option><option value="user">User</option></select></label><div class="button-row"><button type="button" class="secondary" data-close="personModal">取消</button><button class="primary">儲存</button></div></form></div></div>
+
+<div class="modal" id="memorialModal" hidden><div class="modal-box"><div class="modal-head"><h2>新增紀念日</h2><button class="icon-btn close" data-close="memorialModal">×</button></div><form id="memorialForm"><label>名稱<input id="memorialTitle" required placeholder="例如：在一起紀念日"></label><label>日期<input id="memorialDate" type="date" required></label><label>類型<select id="memorialKind"><option>在一起</option><option>生日</option><option>初遇</option><option>結婚／領證</option><option>其他</option></select></label><label class="check"><input id="memorialAnnual" type="checkbox" checked> 每年重複</label><label>備註<textarea id="memorialNote" rows="3" placeholder="可留空"></textarea></label><div class="button-row"><button type="button" class="secondary" data-close="memorialModal">取消</button><button class="primary">儲存</button></div></form></div></div>
+
+<div class="toast" id="toast"></div>
+<script src="./ephone-core.js"></script>
+</div>
+</body>
+</html>

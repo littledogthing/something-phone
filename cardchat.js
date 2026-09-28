@@ -530,6 +530,47 @@
   transition:.22s; pointer-events:none; max-width:82vw; text-align:center; }
 .cc-toast.show { opacity:1; transform:translate(-50%,0); }
 
+/* ---- 第三頁排成三欄 ----
+   宿主 ephone-modern.css 用 display:flex !important 排成單排，
+   多一個 app 就會擠到溢出。這裡用更高的選擇器權重改成三欄格線。 */
+.ephone-third-page .ephone-third-apps{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  width:100% !important; max-width:330px !important;
+  margin:0 auto !important; gap:18px 6px !important;
+  justify-content:center !important; align-items:start !important;
+}
+.ephone-third-page .ephone-third-app{
+  min-height:0 !important; padding:10px 4px !important; width:auto !important;
+}
+.ephone-third-page .ephone-third-app-name{
+  font-size:13px !important; line-height:1.3 !important;
+}
+
+/* ---- 彈窗 ---- */
+.cc-mask{position:absolute;inset:0;z-index:60;display:flex;align-items:center;
+  justify-content:center;padding:18px;background:rgba(0,0,0,.42);
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.cc-modal{width:100%;max-width:310px;max-height:88%;overflow-y:auto;
+  background:var(--secondary-bg,#fff);border-radius:18px;padding:18px 17px 14px;
+  box-shadow:0 18px 50px rgba(0,0,0,.3)}
+.cc-m-title{font-size:18px;font-weight:600;margin-bottom:4px}
+.cc-m-sub{font-size:12.5px;color:var(--text-secondary,#8a8a8a);margin-bottom:14px;line-height:1.6}
+.cc-m-label{font-size:12.5px;color:var(--text-secondary,#8a8a8a);margin:12px 0 5px}
+.cc-modal textarea,.cc-modal input[type=text]{width:100%;border:1px solid var(--border-color,#e0e0e0);
+  border-radius:11px;padding:10px 12px;font:inherit;font-size:15px;background:#fafafa;
+  color:var(--text-primary,#1f1f1f);resize:none;line-height:1.6}
+.cc-modal textarea{min-height:132px}
+.cc-modal textarea:focus,.cc-modal input:focus{outline:none;border-color:var(--accent-color,#007bff)}
+.cc-m-foot{display:flex;gap:9px;justify-content:flex-end;margin-top:17px;
+  padding-top:13px;border-top:1px solid var(--border-color,#e0e0e0)}
+.cc-opt{display:block;width:100%;text-align:left;border:1px solid var(--border-color,#e0e0e0);
+  background:transparent;color:var(--text-primary,#1f1f1f);border-radius:12px;
+  padding:13px 14px;font:inherit;font-size:15px;margin-bottom:9px;cursor:pointer}
+.cc-opt:active{background:rgba(0,0,0,.05)}
+.cc-opt small{display:block;font-size:12px;color:var(--text-secondary,#8a8a8a);margin-top:3px}
+.cc-opt.danger{color:#d9534f}
+
 /* ---- 兩層分類滑塊 ---- */
 #${SCREEN_ID} .cc-pills { display:flex; gap:7px; overflow-x:auto; overflow-y:hidden;
   -webkit-overflow-scrolling:touch; scrollbar-width:none;
@@ -566,6 +607,66 @@
 .cc-sec { font-size:12px; color:var(--text-secondary,#8a8a8a);
   padding:18px 14px 7px; }
 `;
+
+  /* ========================================================================
+   * 彈窗
+   * ------------------------------------------------------------------------
+   * 取代瀏覽器原生的 prompt / confirm。原生對話框在 iOS 上樣式無法控制，
+   * 而且一次只能問一件事（「輸入 1 改名、2 清空、3 刪除」那種寫法就是被逼的）。
+   * 彈窗掛在 App 自己的畫面節點裡，所以永遠待在手機殼範圍內。
+   * ======================================================================*/
+  function closeModal() {
+    var m = document.querySelector('#' + SCREEN_ID + ' .cc-mask');
+    if (m) m.remove();
+  }
+
+  // opts: { title, sub, html, buttons:[{label, cls, onClick}] }
+  // onClick 回傳 false 代表不要關閉（例如驗證沒過）
+  function ccModal(opts) {
+    closeModal();
+    var mask = document.createElement('div');
+    mask.className = 'cc-mask';
+    var foot = (opts.buttons || []).map(function (b, i) {
+      return '<button class="cc-btn ' + (b.cls || 'ghost') + '" data-b="' + i + '">' +
+        esc(b.label) + '</button>';
+    }).join('');
+    mask.innerHTML = '<div class="cc-modal">' +
+      '<div class="cc-m-title">' + esc(opts.title || '') + '</div>' +
+      (opts.sub ? '<div class="cc-m-sub">' + esc(opts.sub) + '</div>' : '') +
+      (opts.html || '') +
+      (foot ? '<div class="cc-m-foot">' + foot + '</div>' : '') +
+      '</div>';
+    mask.addEventListener('click', function (e) { if (e.target === mask) closeModal(); });
+    mask.querySelectorAll('[data-b]').forEach(function (el) {
+      el.onclick = async function () {
+        var b = opts.buttons[Number(el.dataset.b)];
+        var keep = b.onClick ? await b.onClick(mask) : undefined;
+        if (keep !== false) closeModal();
+      };
+    });
+    document.getElementById(SCREEN_ID).appendChild(mask);
+    var f = mask.querySelector('textarea, input');
+    if (f) setTimeout(function () { f.focus(); }, 60);
+    return mask;
+  }
+
+  // 取代 alert()
+  function ccAlert(title, sub) {
+    ccModal({ title: title, sub: sub, buttons: [{ label: '知道了', cls: '' }] });
+  }
+
+  // 取代 confirm()
+  function ccConfirm(title, sub, okLabel) {
+    return new Promise(function (resolve) {
+      ccModal({
+        title: title, sub: sub,
+        buttons: [
+          { label: '取消', cls: 'ghost', onClick: function () { resolve(false); } },
+          { label: okLabel || '確定', cls: 'danger', onClick: function () { resolve(true); } }
+        ]
+      });
+    });
+  }
 
   /* ========================================================================
    * 畫面注入
@@ -893,7 +994,7 @@
       var delg = $('#cc-delgrp');
       if (delg) delg.onclick = async function () {
         var n = scope.filter(function (c) { return c.grp === activeGrp; }).length;
-        if (!confirm('刪除「' + activeGrp + '」整組共 ' + n + ' 張字卡？')) return;
+        if (!await ccConfirm('刪除整組', '「' + activeGrp + '」底下 ' + n + ' 張字卡都會被刪除，無法復原。', '刪除')) return;
         await db.cards.where('cat').equals(activeCat)
           .and(function (c) { return c.grp === activeGrp; }).delete();
         await rebuildPool(); activeGrp = ''; render(); toast('已刪除');
@@ -938,7 +1039,7 @@
         };
       });
       $('#cc-reset').onclick = async function () {
-        if (!confirm('這會刪掉所有角色、字卡與對話，且無法復原。確定嗎？')) return;
+        if (!await ccConfirm('清空全部資料', '所有角色、字卡與對話都會被刪除，無法復原。建議先匯出備份。', '全部刪除')) return;
         await db.delete();
         toast('已清空，正在重載');
         setTimeout(function () { location.reload(); }, 900);
@@ -959,29 +1060,68 @@
    * 動作
    * ======================================================================*/
   async function addChar() {
-    var name = prompt('角色名稱');
-    if (!name || !name.trim()) return;
-    await db.chars.add({ id: uid('c'), name: name.trim(), avatar: '', createdAt: Date.now() });
-    render();
+    ccModal({
+      title: '新增角色',
+      sub: '這個角色只存在字卡聊天裡，跟手機其他地方的角色互不相干。',
+      html: '<div class="cc-m-label">名稱</div><input type="text" id="cc-f-name" maxlength="20" placeholder="例如：小雨">',
+      buttons: [
+        { label: '取消', cls: 'ghost' },
+        { label: '建立', cls: '', onClick: async function (m) {
+            var v = m.querySelector('#cc-f-name').value.trim();
+            if (!v) return false;
+            await db.chars.add({ id: uid('c'), name: v, avatar: '', createdAt: Date.now() });
+            render();
+          } }
+      ]
+    });
   }
 
-  async function charMenu(ch) {
-    var a = prompt('輸入 1 改名，輸入 2 清空這個角色的對話，輸入 3 刪除角色', '');
-    if (a === '1') {
-      var n = prompt('新的名稱', ch.name);
-      if (n && n.trim()) { await db.chars.update(ch.id, { name: n.trim() }); render(); }
-    } else if (a === '2') {
-      if (confirm('清空與 ' + ch.name + ' 的所有對話？')) {
-        await db.msgs.where('charId').equals(ch.id).delete();
-        render(); toast('已清空');
-      }
-    } else if (a === '3') {
-      if (confirm('刪除角色 ' + ch.name + ' 和所有對話？')) {
-        await db.msgs.where('charId').equals(ch.id).delete();
-        await db.chars.delete(ch.id);
-        go('list'); toast('已刪除');
-      }
-    }
+  function charMenu(ch) {
+    ccModal({
+      title: ch.name,
+      html:
+        '<button class="cc-opt" data-a="rename">改名<small>換一個稱呼</small></button>' +
+        '<button class="cc-opt" data-a="clear">清空對話<small>字卡庫不受影響</small></button>' +
+        '<button class="cc-opt danger" data-a="del">刪除角色<small>連同所有對話一起移除</small></button>',
+      buttons: [{ label: '取消', cls: 'ghost' }]
+    }).querySelectorAll('[data-a]').forEach(function (el) {
+      el.onclick = function () {
+        var a = el.dataset.a;
+        closeModal();
+        if (a === 'rename') renameChar(ch);
+        else if (a === 'clear') clearChat(ch);
+        else if (a === 'del') removeChar(ch);
+      };
+    });
+  }
+
+  function renameChar(ch) {
+    ccModal({
+      title: '改名',
+      html: '<div class="cc-m-label">新的名稱</div><input type="text" id="cc-f-name" maxlength="20" value="' + esc(ch.name) + '">',
+      buttons: [
+        { label: '取消', cls: 'ghost' },
+        { label: '儲存', cls: '', onClick: async function (m) {
+            var v = m.querySelector('#cc-f-name').value.trim();
+            if (!v) return false;
+            await db.chars.update(ch.id, { name: v });
+            render();
+          } }
+      ]
+    });
+  }
+
+  async function clearChat(ch) {
+    if (!await ccConfirm('清空對話', '與 ' + ch.name + ' 的所有訊息都會被刪除，字卡庫不受影響。', '清空')) return;
+    await db.msgs.where('charId').equals(ch.id).delete();
+    render(); toast('已清空');
+  }
+
+  async function removeChar(ch) {
+    if (!await ccConfirm('刪除角色', '「' + ch.name + '」與所有對話都會被刪除，無法復原。', '刪除')) return;
+    await db.msgs.where('charId').equals(ch.id).delete();
+    await db.chars.delete(ch.id);
+    go('list'); toast('已刪除');
   }
 
   // 整組開關：鍵是「大分類/小分類」，所以不同分類下的同名分組互不影響
@@ -997,27 +1137,45 @@
   }
 
   async function addCard() {
-    var cat = activeCat, grp = activeGrp;
-    if (!cat) {
-      cat = prompt('要加到哪個大分類？（沒有的話會新建）', '主字卡');
-      if (!cat || !cat.trim()) return;
-      cat = cat.trim();
-    }
-    if (!grp) {
-      grp = prompt('要加到哪個小分類？（沒有的話會新建）', '');
-      if (!grp || !grp.trim()) return;
-      grp = grp.trim();
-    }
-    var t = prompt('新字卡內容（多張請用換行分隔）');
-    if (!t || !t.trim()) return;
-    var lines = t.split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
-    await db.cards.bulkAdd(lines.map(function (x) {
-      return { cat: cat, grp: grp, text: x, off: 0 };
-    }));
-    await rebuildPool();
-    activeCat = cat; activeGrp = grp; q = '';
-    render();
-    toast('加了 ' + lines.length + ' 張');
+    var all = await db.cards.toArray();
+    var cats = [], grps = [];
+    all.forEach(function (c) {
+      var k = c.cat || '主字卡';
+      if (cats.indexOf(k) === -1) cats.push(k);
+      if ((!activeCat || k === activeCat) && grps.indexOf(c.grp) === -1) grps.push(c.grp);
+    });
+    var dl = function (id, arr) {
+      return '<datalist id="' + id + '">' + arr.map(function (x) {
+        return '<option value="' + esc(x) + '">';
+      }).join('') + '</datalist>';
+    };
+    ccModal({
+      title: '新增字卡',
+      sub: '每一行就是一張字卡。分類留空或填新的名稱都可以，沒有的會自動建立。',
+      html:
+        '<textarea id="cc-f-text" placeholder="每一行就是一張字卡&#10;例如：&#10;今晚一起看月亮&#10;我現在很想你&#10;記得帶傘"></textarea>' +
+        '<div class="cc-m-label">大分類</div>' +
+        '<input type="text" id="cc-f-cat" list="cc-dl-cat" value="' + esc(activeCat || '主字卡') + '">' + dl('cc-dl-cat', cats) +
+        '<div class="cc-m-label">小分類</div>' +
+        '<input type="text" id="cc-f-grp" list="cc-dl-grp" value="' + esc(activeGrp) + '" placeholder="例如：生活碎片">' + dl('cc-dl-grp', grps),
+      buttons: [
+        { label: '取消', cls: 'ghost' },
+        { label: '加入', cls: '', onClick: async function (m) {
+            var lines = m.querySelector('#cc-f-text').value
+              .split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
+            var cat = m.querySelector('#cc-f-cat').value.trim() || '主字卡';
+            var grp = m.querySelector('#cc-f-grp').value.trim();
+            if (!lines.length || !grp) return false;
+            await db.cards.bulkAdd(lines.map(function (x) {
+              return { cat: cat, grp: grp, text: x, off: 0 };
+            }));
+            await rebuildPool();
+            activeCat = cat; activeGrp = grp; q = '';
+            render();
+            toast('加了 ' + lines.length + ' 張');
+          } }
+      ]
+    });
   }
 
   async function send() {
@@ -1074,7 +1232,7 @@
       setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
       toast('已匯出 ' + data.cards.length + ' 張字卡');
     } catch (e) {
-      alert('匯出失敗：' + (e && e.message));
+      ccAlert('匯出失敗', String((e && e.message) || e));
     }
   }
 
@@ -1086,15 +1244,26 @@
     try {
       text = await f.text();
     } catch (e) {
-      alert('讀不到這個檔案，如果是從雲端硬碟選的，先把它下載到本機再試一次。');
+      ccAlert('讀不到這個檔案', '如果是從 iCloud 或其他雲端硬碟選的，先把它下載到本機再試一次。');
       return;
     }
     var data;
-    try { data = JSON.parse(text); } catch (e) { alert('這不是有效的 JSON 檔。'); return; }
+    try { data = JSON.parse(text); } catch (e) { ccAlert('檔案讀不懂', '這不是有效的 JSON 檔。'); return; }
     if (!data || data.format !== 'cardchat-backup') {
-      if (!confirm('這份檔案不是本 App 匯出的備份，仍要嘗試匯入嗎？')) return;
+      if (!await ccConfirm('這不是本 App 的備份', '檔案格式看起來不對，仍要嘗試匯入嗎？', '仍要匯入')) return;
     }
-    var mode = confirm('按「確定」＝合併（保留現有資料）\n按「取消」＝覆蓋（清掉現有資料）');
+    var mode = await new Promise(function (resolve) {
+      ccModal({
+        title: '要怎麼匯入？',
+        html:
+          '<button class="cc-opt" data-m="1">合併<small>保留現有資料，把檔案裡的加進來</small></button>' +
+          '<button class="cc-opt danger" data-m="0">覆蓋<small>先清空現有角色、字卡與對話</small></button>',
+        buttons: [{ label: '取消', cls: 'ghost', onClick: function () { resolve(null); } }]
+      }).querySelectorAll('[data-m]').forEach(function (el) {
+        el.onclick = function () { closeModal(); resolve(el.dataset.m === '1'); };
+      });
+    });
+    if (mode === null) return;
     try {
       await db.transaction('rw', db.chars, db.cards, db.msgs, db.meta, async function () {
         if (!mode) {
@@ -1118,7 +1287,7 @@
       render();
       toast('匯入完成');
     } catch (e) {
-      alert('匯入失敗，原有資料已保留：' + (e && e.message));
+      ccAlert('匯入失敗', '原有資料已保留。' + String((e && e.message) || e));
     }
   }
 
